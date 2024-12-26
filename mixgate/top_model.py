@@ -20,7 +20,7 @@ from .dg_model import Model as DeepGate
 class TopModel(nn.Module):
     def __init__(self, 
                  args, 
-                 dc_ckpt, 
+                 # dc_ckpt, 
                  # dg_ckpt
                  # add aig,mig,mag,xam pt
                  dg_ckpt_aig, 
@@ -33,8 +33,8 @@ class TopModel(nn.Module):
         self.mask_ratio = args.mask_ratio
         
         # DeepCell 
-        self.deepcell = DeepCell(dim_hidden=args.dim_hidden)
-        self.deepcell.load(dc_ckpt)
+        # self.deepcell = DeepCell(dim_hidden=args.dim_hidden)
+        # self.deepcell.load(dc_ckpt)
         
         # DeepGate 
         # self.deepgate = DeepGate(dim_hidden=args.dim_hidden)
@@ -59,7 +59,44 @@ class TopModel(nn.Module):
         
         # Token masking
         self.mask_token = nn.Parameter(torch.randn(1, args.dim_hidden))  # learnable mask token
+    
+    def mask_and_predict(self, G, aig_tokens, mig_tokens, mag_tokens, xag_tokens):
+        """
+        新增：
+        随机选择一个模态 (AIG, MIG, MAG, or XAG) 进行掩码，并预测它。
+        Args:
+            G: 输入图
+            aig_tokens, mig_tokens, mag_tokens, xag_tokens: 每种模态的 token
+        Returns:
+            predicted_tokens: 预测的被掩码模态 token
+        """
+        # 随机选择一个模态进行掩码
+        modalities = ['aig', 'mig', 'mag', 'xag']
+        masked_modality = modalities[torch.randint(0, 4, (1,)).item()]
         
+        # 根据选择的模态进行掩码
+        if masked_modality == 'aig':
+            masked_tokens, mask_indices = self.mask_tokens(G, aig_tokens, self.mask_ratio, k_hop=4)
+            input_tokens = torch.cat([mig_tokens, mag_tokens, xag_tokens], dim=0)
+        elif masked_modality == 'mig':
+            masked_tokens, mask_indices = self.mask_tokens(G, mig_tokens, self.mask_ratio, k_hop=4)
+            input_tokens = torch.cat([aig_tokens, mag_tokens, xag_tokens], dim=0)
+        elif masked_modality == 'mag':
+            masked_tokens, mask_indices = self.mask_tokens(G, mag_tokens, self.mask_ratio, k_hop=4)
+            input_tokens = torch.cat([aig_tokens, mig_tokens, xag_tokens], dim=0)
+        else:  # 'xag'
+            masked_tokens, mask_indices = self.mask_tokens(G, xag_tokens, self.mask_ratio, k_hop=4)
+            input_tokens = torch.cat([aig_tokens, mig_tokens, mag_tokens], dim=0)
+        
+        # 将掩码后的 token 与其他模态的 token 拼接
+        all_tokens = torch.cat([masked_tokens, input_tokens], dim=0)
+        
+        # Transformer forward
+        predicted_tokens = self.mask_tf(all_tokens)
+        
+        # 返回被掩码模态的预测 token
+        return predicted_tokens[:masked_tokens.shape[0], :], mask_indices
+    
     def mask_tokens(self, G, tokens, mask_ratio=0.05, k_hop=4): 
         """
         Randomly mask a ratio of tokens and extract its k_hop
@@ -95,9 +132,9 @@ class TopModel(nn.Module):
         self.device = next(self.parameters()).device
         
         # Get PM and AIG tokens
-        pm_hs, pm_hf = self.deepcell(G)
-        pm_tokens = torch.cat([pm_hs, pm_hf], dim=1)
-        mcm_pm_tokens = torch.zeros(0, self.args.dim_hidden * 2).to(self.device)
+        # pm_hs, pm_hf = self.deepcell(G)
+        # pm_tokens = torch.cat([pm_hs, pm_hf], dim=1)
+        # mcm_pm_tokens = torch.zeros(0, self.args.dim_hidden * 2).to(self.device)
 
         # aig_hs, aig_hf = self.deepgate(G)
         # aig_hs = aig_hs.detach()
@@ -127,10 +164,24 @@ class TopModel(nn.Module):
 
         
         # Mask a portion of PM tokens
-        pm_tokens_masked, mask_indices = self.mask_tokens(
-            G, pm_tokens, self.mask_ratio, k_hop=4
-        )
+        # pm_tokens_masked, mask_indices = self.mask_tokens(
+        #     G, pm_tokens, self.mask_ratio, k_hop=4
+        # )
         
+        # 模态列表
+        modalities = ['aig', 'mig', 'mag', 'xag']
+        tokens_dict = {
+            'aig': (aig_tokens, aig_hf, self.deepgate_aig),
+            'mig': (mig_tokens, mig_hf, self.deepgate_mig),
+            'mag': (mag_tokens, mag_hf, self.deepgate_mag),
+            'xag': (xag_tokens, xag_hf, self.deepgate_xag),
+        }
+        # 随机选择一个模态
+        selected_modality = modalities[torch.randint(0, len(modalities), (1,)).item()]
+        selected_tokens, masked_hf, encoder = tokens_dict[selected_modality]
+        # 对选定模态进行掩码
+        masked_tokens, mask_indices = self.mask_tokens(G, selected_tokens, self.mask_ratio, k_hop=4)
+    
         # Reconstruction: Mask Circuit Modeling 
         # for batch_id in range(G.batch.max().item() + 1): 
         #     batch_pm_tokens_masked = pm_tokens_masked[G.batch == batch_id]
@@ -139,35 +190,44 @@ class TopModel(nn.Module):
         #     batch_predicted_tokens = self.mask_tf(batch_all_tokens)
         #     batch_pred_pm_tokens = batch_predicted_tokens[:batch_pm_tokens_masked.shape[0], :]
         #     mcm_pm_tokens = torch.cat([mcm_pm_tokens, batch_pred_pm_tokens], dim=0)
-        
+
         # Reconstruction: Mask Circuit Modeling 
         for batch_id in range(G.batch.max().item() + 1): 
-            batch_pm_tokens_masked = pm_tokens_masked[G.batch == batch_id]
+            # batch_pm_tokens_masked = pm_tokens_masked[G.batch == batch_id]
             batch_aig_tokens = aig_tokens[G.aig_batch == batch_id]
             batch_mig_tokens = mig_tokens[G.mig_batch == batch_id]
             batch_mag_tokens = mag_tokens[G.mag_batch == batch_id]
             batch_xag_tokens = xag_tokens[G.xag_batch == batch_id]
             
-            # Combine all tokens
-            batch_all_tokens = torch.cat([
-                batch_pm_tokens_masked, 
-                batch_aig_tokens, 
-                batch_mig_tokens, 
-                batch_mag_tokens, 
-                batch_xag_tokens
-            ], dim=0)
+            # 根据被掩码的模态，排除该模态的原 token，拼接其余模态
+            if selected_modality == 'aig':
+                other_tokens = torch.cat([batch_mig_tokens, batch_mag_tokens, batch_xag_tokens], dim=0)
+                batch_masked_tokens = masked_tokens[G.aig_batch == batch_id]
+            elif selected_modality == 'mig':
+                other_tokens = torch.cat([batch_aig_tokens, batch_mag_tokens, batch_xag_tokens], dim=0)
+                batch_masked_tokens = masked_tokens[G.mig_batch == batch_id]
+            elif selected_modality == 'mag':
+                other_tokens = torch.cat([batch_aig_tokens, batch_mig_tokens, batch_xag_tokens], dim=0)
+                batch_masked_tokens = masked_tokens[G.mag_batch == batch_id]
+            elif selected_modality == 'xag':
+                other_tokens = torch.cat([batch_aig_tokens, batch_mig_tokens, batch_mag_tokens], dim=0)
+                batch_masked_tokens = masked_tokens[G.xag_batch == batch_id]
+
+            # 将掩码后的 token 与其他模态的 token 拼接
+            batch_all_tokens = torch.cat([batch_masked_tokens, other_tokens], dim=0)
             
             # Transformer forward
             batch_predicted_tokens = self.mask_tf(batch_all_tokens)
-            batch_pred_pm_tokens = batch_predicted_tokens[:batch_pm_tokens_masked.shape[0], :]
-            mcm_pm_tokens = torch.cat([mcm_pm_tokens, batch_pred_pm_tokens], dim=0)
-
+            batch_pred_masked_tokens = batch_predicted_tokens[:batch_masked_tokens.shape[0], :]
+             # 收集预测的被掩码的 token
+            mcm_predicted_tokens = torch.cat([mcm_predicted_tokens, batch_pred_masked_tokens], dim=0)
         
-        # Predict PM probability 
-        pm_prob = self.deepcell.pred_prob(pm_hf)
+        # Predict probability 
+        masked_prob = encoder.pred_prob(masked_hf)
         
-        return mcm_pm_tokens, mask_indices, pm_tokens, pm_prob
+        return mcm_predicted_tokens, mask_indices, selected_tokens, masked_prob
    
+
     def load(self, model_path):
         checkpoint = torch.load(model_path, map_location=lambda storage, loc: storage)
         state_dict_ = checkpoint['state_dict']
