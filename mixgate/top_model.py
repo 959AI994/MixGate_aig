@@ -21,7 +21,12 @@ class TopModel(nn.Module):
     def __init__(self, 
                  args, 
                  dc_ckpt, 
-                 dg_ckpt
+                 # dg_ckpt
+                 # add aig,mig,mag,xam pt
+                 dg_ckpt_aig, 
+                 dg_ckpt_mig, 
+                 dg_ckpt_mag, 
+                 dg_ckpt_xag
                 ):
         super(TopModel, self).__init__()
         self.args = args
@@ -32,8 +37,21 @@ class TopModel(nn.Module):
         self.deepcell.load(dc_ckpt)
         
         # DeepGate 
-        self.deepgate = DeepGate(dim_hidden=args.dim_hidden)
-        self.deepgate.load(dg_ckpt)
+        # self.deepgate = DeepGate(dim_hidden=args.dim_hidden)
+        # self.deepgate.load(dg_ckpt)
+
+        # DeepGate for AIG, MIG, MAG, XAG
+        self.deepgate_aig = DeepGate(dim_hidden=args.dim_hidden)
+        self.deepgate_aig.load(dg_ckpt_aig)
+        
+        self.deepgate_mig = DeepGate(dim_hidden=args.dim_hidden)
+        self.deepgate_mig.load(dg_ckpt_mig)
+        
+        self.deepgate_mag = DeepGate(dim_hidden=args.dim_hidden)
+        self.deepgate_mag.load(dg_ckpt_mag)
+        
+        self.deepgate_xag = DeepGate(dim_hidden=args.dim_hidden)
+        self.deepgate_xag.load(dg_ckpt_xag)
         
         # Transformer
         tf_layer = nn.TransformerEncoderLayer(d_model=args.dim_hidden * 2, nhead=args.tf_head, batch_first=True)
@@ -78,12 +96,35 @@ class TopModel(nn.Module):
         
         # Get PM and AIG tokens
         pm_hs, pm_hf = self.deepcell(G)
-        aig_hs, aig_hf = self.deepgate(G)
+        pm_tokens = torch.cat([pm_hs, pm_hf], dim=1)
+        mcm_pm_tokens = torch.zeros(0, self.args.dim_hidden * 2).to(self.device)
+
+        # aig_hs, aig_hf = self.deepgate(G)
+        # aig_hs = aig_hs.detach()
+        # aig_hf = aig_hf.detach()
+        # aig_tokens = torch.cat([aig_hs, aig_hf], dim=1)
+        
+        # Get tokens from AIG, MIG, MAG, XAG
+        aig_hs, aig_hf = self.deepgate_aig(G)
         aig_hs = aig_hs.detach()
         aig_hf = aig_hf.detach()
-        pm_tokens = torch.cat([pm_hs, pm_hf], dim=1)
         aig_tokens = torch.cat([aig_hs, aig_hf], dim=1)
-        mcm_pm_tokens = torch.zeros(0, self.args.dim_hidden * 2).to(self.device)
+
+        mig_hs, mig_hf = self.deepgate_mig(G)
+        mig_hs = mig_hs.detach()
+        mig_hf = mig_hf.detach()
+        mig_tokens = torch.cat([mig_hs, mig_hf], dim=1)
+        
+        mag_hs, mag_hf = self.deepgate_mag(G)
+        mag_hs = mag_hs.detach()
+        mag_hf = mag_hf.detach()
+        mag_tokens = torch.cat([mag_hs, mag_hf], dim=1)
+        
+        xag_hs, xag_hf = self.deepgate_xag(G)
+        xag_hs = xag_hs.detach()
+        xag_hf = xag_hf.detach()
+        xag_tokens = torch.cat([xag_hs, xag_hf], dim=1)
+
         
         # Mask a portion of PM tokens
         pm_tokens_masked, mask_indices = self.mask_tokens(
@@ -91,14 +132,36 @@ class TopModel(nn.Module):
         )
         
         # Reconstruction: Mask Circuit Modeling 
+        # for batch_id in range(G.batch.max().item() + 1): 
+        #     batch_pm_tokens_masked = pm_tokens_masked[G.batch == batch_id]
+        #     batch_aig_tokens = aig_tokens[G.aig_batch == batch_id]
+        #     batch_all_tokens = torch.cat([batch_pm_tokens_masked, batch_aig_tokens], dim=0)
+        #     batch_predicted_tokens = self.mask_tf(batch_all_tokens)
+        #     batch_pred_pm_tokens = batch_predicted_tokens[:batch_pm_tokens_masked.shape[0], :]
+        #     mcm_pm_tokens = torch.cat([mcm_pm_tokens, batch_pred_pm_tokens], dim=0)
+        
+        # Reconstruction: Mask Circuit Modeling 
         for batch_id in range(G.batch.max().item() + 1): 
             batch_pm_tokens_masked = pm_tokens_masked[G.batch == batch_id]
             batch_aig_tokens = aig_tokens[G.aig_batch == batch_id]
-            batch_all_tokens = torch.cat([batch_pm_tokens_masked, batch_aig_tokens], dim=0)
+            batch_mig_tokens = mig_tokens[G.mig_batch == batch_id]
+            batch_mag_tokens = mag_tokens[G.mag_batch == batch_id]
+            batch_xag_tokens = xag_tokens[G.xag_batch == batch_id]
+            
+            # Combine all tokens
+            batch_all_tokens = torch.cat([
+                batch_pm_tokens_masked, 
+                batch_aig_tokens, 
+                batch_mig_tokens, 
+                batch_mag_tokens, 
+                batch_xag_tokens
+            ], dim=0)
+            
+            # Transformer forward
             batch_predicted_tokens = self.mask_tf(batch_all_tokens)
             batch_pred_pm_tokens = batch_predicted_tokens[:batch_pm_tokens_masked.shape[0], :]
             mcm_pm_tokens = torch.cat([mcm_pm_tokens, batch_pred_pm_tokens], dim=0)
-            
+
         
         # Predict PM probability 
         pm_prob = self.deepcell.pred_prob(pm_hf)
