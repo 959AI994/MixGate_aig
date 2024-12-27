@@ -14,7 +14,8 @@ DATA_DIR = './data/dg_pair'
 
 if __name__ == '__main__':
     args = get_parse_args()
-    circuit_path = '/Users/zhengyuanshi/studio/DeepCell_Dataset/deepgate_dataset/pair_graphs.npz'
+    # here,we need to build some npz formate including mig,mag,xag,aig fusion graph
+    circuit_path = 'datasets/pair_graphs.npz'
     num_epochs = args.num_epochs
     
     print('[INFO] Parse Dataset')
@@ -23,8 +24,11 @@ if __name__ == '__main__':
     print('[INFO] Create Model and Trainer')
     model = mixgate.top_model.TopModel(
         args, 
-        dc_ckpt='./ckpt/dc.pth', 
-        dg_ckpt='./ckpt/dg.pth'
+        # dc_ckpt='./ckpt/dc.pth', 
+        dg_aig_ckpt='./ckpt/dg_aig.pth'
+        dg_xag_ckpt='./ckpt/dg_xag.pth'
+        dg_mag_ckpt='./ckpt/dg_mag.pth'
+        dg_mig_ckpt='./ckpt/dg_mig.pth'
     )
     
     trainer = mixgate.top_trainer.TopTrainer(args, model, distributed=True)
