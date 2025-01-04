@@ -1,0 +1,11 @@
+INPUT(n1)
+INPUT(n2)
+INPUT(n3)
+INPUT(n4)
+INPUT(n5)
+OUTPUT(po0)
+OUTPUT(po1)
+n0 = gnd
+n6 = LUT 0x8e (n0, n2, n3)
+po0 = LUT 0x2 (n6)
+po1 = LUT 0x2 (n5)
