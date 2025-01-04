@@ -53,6 +53,16 @@ def count_dict_keys_in_list(dict_keys, string_list):
     
     return dict(count_dict)
 
+def count_dict_keys_in_list(dict_keys, string_list):
+    count_dict = defaultdict(int)
+    for key in dict_keys:
+        pattern = r'\b' + re.escape(key) + r'\b'
+        for string in string_list:
+            if re.fullmatch(pattern, string):
+                count_dict[key] += 1
+    
+    return dict(count_dict)
+
 def extract_lines_from_files(directory, aimed_directory):
     dic = {"0xe8": [0, 0, 0], "0x8e":[1, 0, 0], "0xb2":[0, 1, 0], "0xd4":[0, 0, 1]}
 
@@ -62,9 +72,11 @@ def extract_lines_from_files(directory, aimed_directory):
         added_nodes = 0
         count_input = 1
         no_nodes = 1
+        no_nodes = 1
         count_output = 0
         count_inner_index = 0
         total_nodes = 0
+        inner_nodes = 0
         inner_nodes = 0
         dic_nodes = {}
         nodes_appear = {}
@@ -84,18 +96,24 @@ def extract_lines_from_files(directory, aimed_directory):
                         if "INPUT" in line:
                             input = line.split("(")[1].split(")")[0]
                             dic_nodes[input] = no_nodes
+                            dic_nodes[input] = no_nodes
                             count_input += 1
+                            no_nodes += 1
                             no_nodes += 1
                         elif "OUTPUT" in line:
                             output = line.split("(")[1].split(")")[0]
                             dic_nodes[output] = no_nodes
+                            dic_nodes[output] = no_nodes
                             count_output += 1
+                            no_nodes += 1
                             no_nodes += 1
                         #append_to_bench_file(aimed_directory, filename, line)
                     else:
                         if "po" not in line:
                             inner_node = line.split(" ")[0]
                             #print("inner_node =", inner_node)
+                            dic_nodes[inner_node] = no_nodes
+                            no_nodes += 1
                             dic_nodes[inner_node] = no_nodes
                             no_nodes += 1
                         if "0xe8" in line:
@@ -109,6 +127,7 @@ def extract_lines_from_files(directory, aimed_directory):
                             file_content.append(added_node_dic[added_nodes] + " = " + "NOT" + "(" + node + ")" + '\n')
                             added_nodes += 1
                             
+                            
                         elif "0xb2" in line:
                             content = line.split(" ")
                             added_node_dic.append(f"a{added_nodes}")
@@ -117,6 +136,7 @@ def extract_lines_from_files(directory, aimed_directory):
                             file_content.append(added_node_dic[added_nodes] + " = " + "NOT" + "(" + node + ")" + '\n')
                             added_nodes += 1
                             
+                            
                         elif "0xd4" in line:
                             content = line.split(" ")
                             added_node_dic.append(f"a{added_nodes}")
@@ -124,6 +144,7 @@ def extract_lines_from_files(directory, aimed_directory):
                             node = line.split("(")[1].split(" ")[2].split(")")[0]
                             file_content.append(added_node_dic[added_nodes] + " = " + "NOT" + "(" + node + ")" + '\n')
                             added_nodes += 1
+                            
                             
                         elif "0x96" in line:
                             content = line.split(" ")
@@ -146,6 +167,11 @@ def extract_lines_from_files(directory, aimed_directory):
                         #     added_node_dic.append(f"a{added_nodes}")
                         #     file_content.append(content[0] + " = " + "BUF"  + content[4])
                         #     added_nodes += 1
+                        # elif "0x2" in line and len(line.split(" ")) <= 5:
+                        #     content = line.split(" ")
+                        #     added_node_dic.append(f"a{added_nodes}")
+                        #     file_content.append(content[0] + " = " + "BUF"  + content[4])
+                        #     added_nodes += 1
                         elif "0x2" in line and len(line.split(" ")) >= 6:
                             content = line.split(" ")
                             #print(len(content))
@@ -155,11 +181,14 @@ def extract_lines_from_files(directory, aimed_directory):
                             file_content.append(added_node_dic[added_nodes] + " = " + "NOT" + "(" + node + ")" + '\n')
                             added_nodes += 1           
                     
+                            added_nodes += 1           
+                    
                         elif "0x1" in line and len(line.split(" ")) <= 5:
                             content = line.split(" ")
                             added_node_dic.append(f"a{added_nodes}")
                             file_content.append(content[0] + " = " + "NOT"  + content[4])
                             added_nodes += 1
+
 
                         elif "0x1" in line and len(line.split(" ")) >= 6:
                             content = line.split(" ")
@@ -176,7 +205,17 @@ def extract_lines_from_files(directory, aimed_directory):
                 # total_nodes = count_input + count_inner_index + 1
                 # print("total_nodes =", no_nodes)
                 # print("added_nodes =", added_nodes)
+
+                # total_nodes = count_input + count_inner_index + 1
+                # print("total_nodes =", no_nodes)
+                # print("added_nodes =", added_nodes)
                 for i in range(added_nodes):
+                    dic_nodes[f"a{i}"] = no_nodes
+                    no_nodes += 1
+                # print("dic_nodes =", dic_nodes)
+                # print("file_content =", file_content)
+                # dic = count_dict_keys_in_list(dic_nodes, file_content)
+                # print("dic =", dic)
                     dic_nodes[f"a{i}"] = no_nodes
                     no_nodes += 1
                 # print("dic_nodes =", dic_nodes)
