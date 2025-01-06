@@ -212,18 +212,9 @@ def extract_lines_from_files(directory, aimed_directory):
                 for i in range(added_nodes):
                     dic_nodes[f"a{i}"] = no_nodes
                     no_nodes += 1
-                # print("dic_nodes =", dic_nodes)
-                # print("file_content =", file_content)
-                # dic = count_dict_keys_in_list(dic_nodes, file_content)
-                # print("dic =", dic)
                     dic_nodes[f"a{i}"] = no_nodes
                     no_nodes += 1
-                # print("dic_nodes =", dic_nodes)
-                # print("file_content =", file_content)
-                # dic = count_dict_keys_in_list(dic_nodes, file_content)
-                # print("dic =", dic)
                 replace_nodes(file_content, dic_nodes)
-                # print("file_content =", file_content)
         if len(dic_nodes) > 1000:
             continue                
         with open(aimed_file_path, 'w') as file:
