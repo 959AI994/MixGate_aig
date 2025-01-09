@@ -1,0 +1,107 @@
+INPUT(n1)
+INPUT(n2)
+INPUT(n3)
+INPUT(n4)
+INPUT(n5)
+INPUT(n6)
+INPUT(n7)
+INPUT(n8)
+INPUT(n9)
+INPUT(n10)
+INPUT(n11)
+OUTPUT(po0)
+OUTPUT(po1)
+OUTPUT(po2)
+OUTPUT(po3)
+OUTPUT(po4)
+OUTPUT(po5)
+OUTPUT(po6)
+OUTPUT(po7)
+OUTPUT(po8)
+OUTPUT(po9)
+OUTPUT(po10)
+OUTPUT(po11)
+OUTPUT(po12)
+OUTPUT(po13)
+OUTPUT(po14)
+OUTPUT(po15)
+OUTPUT(po16)
+OUTPUT(po17)
+OUTPUT(po18)
+OUTPUT(po19)
+OUTPUT(po20)
+OUTPUT(po21)
+OUTPUT(po22)
+OUTPUT(po23)
+OUTPUT(po24)
+OUTPUT(po25)
+OUTPUT(po26)
+OUTPUT(po27)
+n0 = gnd
+n12 = LUT 0xe8 (n0, n1, n7)
+n13 = LUT 0xb2 (n0, n1, n3)
+n14 = LUT 0xd4 (n0, n12, n13)
+n15 = LUT 0xe8 (n0, n1, n10)
+n16 = LUT 0xb2 (n0, n1, n6)
+n17 = LUT 0xd4 (n0, n15, n16)
+n18 = LUT 0xe8 (n0, n1, n8)
+n19 = LUT 0xb2 (n0, n1, n4)
+n20 = LUT 0xd4 (n0, n18, n19)
+n21 = LUT 0xe8 (n0, n1, n9)
+n22 = LUT 0xb2 (n0, n1, n5)
+n23 = LUT 0xd4 (n0, n21, n22)
+n24 = LUT 0xb2 (n0, n14, n17)
+n25 = LUT 0x8e (n20, n23, n24)
+n26 = LUT 0xb2 (n17, n20, n25)
+n27 = LUT 0x8e (n14, n23, n26)
+n28 = LUT 0x8e (n0, n25, n27)
+n29 = LUT 0x8e (n14, n20, n23)
+n30 = LUT 0xe8 (n0, n14, n29)
+n31 = LUT 0x8e (n17, n29, n30)
+n32 = LUT 0xe8 (n0, n17, n29)
+n33 = LUT 0x8e (n0, n31, n32)
+n34 = LUT 0x8e (n17, n20, n23)
+n35 = LUT 0xb2 (n14, n17, n23)
+n36 = LUT 0xe8 (n0, n34, n35)
+n37 = LUT 0xd4 (n29, n34, n36)
+n38 = LUT 0x8e (n0, n17, n23)
+n39 = LUT 0xe8 (n17, n20, n23)
+n40 = LUT 0xd4 (n14, n38, n39)
+n41 = LUT 0xe8 (n0, n17, n20)
+n42 = LUT 0xd4 (n14, n20, n23)
+n43 = LUT 0xb2 (n14, n23, n39)
+n44 = LUT 0xd4 (n41, n42, n43)
+n45 = LUT 0xd4 (n0, n17, n23)
+n46 = LUT 0xd4 (n17, n20, n23)
+n47 = LUT 0xd4 (n35, n45, n46)
+n48 = LUT 0xd4 (n14, n17, n20)
+n49 = LUT 0xb2 (n14, n23, n41)
+n50 = LUT 0x8e (n14, n48, n49)
+po0 = LUT 0x2 (n28)
+po1 = LUT 0x2 (n33)
+po2 = LUT 0x2 (n37)
+po3 = gnd
+po4 = gnd
+po5 = gnd
+po6 = gnd
+po7 = gnd
+po8 = gnd
+po9 = gnd
+po10 = vdd
+po11 = gnd
+po12 = gnd
+po13 = gnd
+po14 = gnd
+po15 = gnd
+po16 = gnd
+po17 = gnd
+po18 = gnd
+po19 = gnd
+po20 = gnd
+po21 = gnd
+po22 = gnd
+po23 = LUT 0x2 (n40)
+po24 = LUT 0x1 (n44)
+po25 = LUT 0x1 (n47)
+po26 = LUT 0x1 (n50)
+po27 = LUT 0x2 (n11)

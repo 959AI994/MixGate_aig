@@ -14,21 +14,26 @@ DATA_DIR = './data/dg_pair'
 
 if __name__ == '__main__':
     args = get_parse_args()
-    # here,we need to build some npz formate including mig,mag,xag,aig fusion graph
-    circuit_path = 'datasets/pair_graphs.npz'
+    # here,we need to build some npz formate including mig,xmg,xag,aig fusion graph
+
+    # circuit_path = 'datasets/pair_graphs.npz'
+    circuit_path ='/home/jwt/MixGate/datasets/merged_all.npz'
+
     num_epochs = args.num_epochs
     
     print('[INFO] Parse Dataset')
     dataset = mixgate.NpzParser_Pair(DATA_DIR, circuit_path)
+    # dataset = mixgate.AigParser(DATA_DIR, circuit_path)
+
     train_dataset, val_dataset = dataset.get_dataset()
     print('[INFO] Create Model and Trainer')
     model = mixgate.top_model.TopModel(
         args, 
         # dc_ckpt='./ckpt/dc.pth', 
-        dg_aig_ckpt='./ckpt/dg_aig.pth'
-        dg_xag_ckpt='./ckpt/dg_xag.pth'
-        dg_mag_ckpt='./ckpt/dg_mag.pth'
-        dg_mig_ckpt='./ckpt/dg_mig.pth'
+        dg_aig_ckpt='/home/wjx/MixGate/ckpt/model_aig_gpu.pth',
+        dg_xag_ckpt='/home/wjx/MixGate/ckpt/model_xag_gpu.pth',
+        dg_xmg_ckpt='/home/wjx/MixGate/ckpt/model_xmg_gpu.pth',
+        dg_mig_ckpt='/home/wjx/MixGate/ckpt/model_mig_gpu.pth'
     )
     
     trainer = mixgate.top_trainer.TopTrainer(args, model, distributed=True)

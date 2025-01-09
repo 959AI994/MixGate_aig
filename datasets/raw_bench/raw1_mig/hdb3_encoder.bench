@@ -1,0 +1,39 @@
+INPUT(n1)
+INPUT(n2)
+INPUT(n3)
+INPUT(n4)
+INPUT(n5)
+INPUT(n6)
+INPUT(n7)
+INPUT(n8)
+OUTPUT(po0)
+OUTPUT(po1)
+OUTPUT(po2)
+OUTPUT(po3)
+OUTPUT(po4)
+OUTPUT(po5)
+OUTPUT(po6)
+OUTPUT(po7)
+OUTPUT(po8)
+OUTPUT(po9)
+OUTPUT(po10)
+OUTPUT(po11)
+n0 = gnd
+n9 = LUT 0xe8 (n0, n1, n3)
+n10 = LUT 0x8e (n0, n1, n3)
+n11 = LUT 0xb2 (n0, n5, n6)
+n12 = LUT 0xe8 (n0, n2, n11)
+n13 = LUT 0xd4 (n0, n2, n5)
+n14 = LUT 0xe8 (n0, n6, n13)
+po0 = LUT 0x2 (n3)
+po1 = gnd
+po2 = gnd
+po3 = LUT 0x2 (n9)
+po4 = LUT 0x2 (n10)
+po5 = LUT 0x2 (n12)
+po6 = LUT 0x2 (n14)
+po7 = gnd
+po8 = gnd
+po9 = gnd
+po10 = gnd
+po11 = LUT 0x2 (n8)
