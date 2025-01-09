@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # here,we need to build some npz formate including mig,xmg,xag,aig fusion graph
 
     # circuit_path = 'datasets/pair_graphs.npz'
-    circuit_path ='/home/wjx/npz/merged_npz'
+    circuit_path ='/home/jwt/MixGate/datasets/merged_all.npz'
 
     num_epochs = args.num_epochs
     

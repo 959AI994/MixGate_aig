@@ -189,3 +189,4 @@ class BenchParser():
         graph.no_connect = graph.forward_index[(graph['forward_level'] == 0) & (graph['backward_level'] == 0)]
         
         return graph       
+
