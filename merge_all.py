@@ -100,6 +100,8 @@ def merge_all(output_paths, final_output_path):
                 merged[circuit_name]['aig_prob'] = graph['prob']
                 merged[circuit_name]['aig_forward_level'] = graph['forward_level']
                 merged[circuit_name]['aig_backward_level'] = graph['backward_level']
+                merged[circuit_name]['aig_forward_index'] = graph['forward_index']
+                merged[circuit_name]['aig_backward_index'] = graph['backward_index']
 
     # 保存合并后的数据
     np.savez_compressed(final_output_path, circuits=merged)

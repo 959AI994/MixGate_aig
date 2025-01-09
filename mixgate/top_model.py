@@ -130,7 +130,6 @@ class TopModel(nn.Module):
 
     def forward(self, G):
         self.device = next(self.parameters()).device
-        
         # Get PM and AIG tokens
         # pm_hs, pm_hf = self.deepcell(G)
         # pm_tokens = torch.cat([pm_hs, pm_hf], dim=1)

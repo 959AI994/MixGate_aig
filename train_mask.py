@@ -30,13 +30,13 @@ if __name__ == '__main__':
     model = mixgate.top_model.TopModel(
         args, 
         # dc_ckpt='./ckpt/dc.pth', 
-        dg_aig_ckpt='/home/wjx/MixGate/ckpt/model_aig_gpu.pth',
-        dg_xag_ckpt='/home/wjx/MixGate/ckpt/model_xag_gpu.pth',
-        dg_xmg_ckpt='/home/wjx/MixGate/ckpt/model_xmg_gpu.pth',
-        dg_mig_ckpt='/home/wjx/MixGate/ckpt/model_mig_gpu.pth'
+        dg_ckpt_aig='/home/jwt/MixGate/ckpt/model_aig_gpu.pth',
+        dg_ckpt_xag='/home/jwt/MixGate/ckpt/model_xag_gpu.pth',
+        dg_ckpt_mag='/home/jwt/MixGate/ckpt/model_xmg_gpu.pth',
+        dg_ckpt_mig='/home/jwt/MixGate/ckpt/model_mig_gpu.pth'
     )
     
-    trainer = mixgate.top_trainer.TopTrainer(args, model, distributed=True)
+    trainer = mixgate.top_trainer.TopTrainer(args, model, distributed="True")
     trainer.set_training_args(lr=1e-4, lr_step=50)
     print('[INFO] Stage 1 Training ...')
     trainer.train(num_epochs, train_dataset, val_dataset)
