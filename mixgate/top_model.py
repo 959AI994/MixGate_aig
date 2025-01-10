@@ -15,7 +15,11 @@ from .arch.tfmlp import TFMlpAggr
 from .arch.gcn_conv import AggConv
 
 from .dc_model import Model as DeepCell
-from .dg_model import Model as DeepGate
+from .dg_model_mig import Model as DeepGate_Mig
+from .dg_model_xmg import Model as DeepGate_Xmg
+from .dg_model_xag import Model as DeepGate_Xag
+from .dg_model import Model as DeepGate_Aig
+
 
 class TopModel(nn.Module):
     def __init__(self, 
@@ -41,16 +45,16 @@ class TopModel(nn.Module):
         # self.deepgate.load(dg_ckpt)
 
         # DeepGate for AIG, MIG, MAG, XAG
-        self.deepgate_aig = DeepGate(dim_hidden=args.dim_hidden)
+        self.deepgate_aig = DeepGate_Aig(dim_hidden=args.dim_hidden)
         self.deepgate_aig.load(dg_ckpt_aig)
         
-        self.deepgate_mig = DeepGate(dim_hidden=args.dim_hidden)
+        self.deepgate_mig = DeepGate_Mig(dim_hidden=args.dim_hidden)
         self.deepgate_mig.load(dg_ckpt_mig)
         
-        self.deepgate_mag = DeepGate(dim_hidden=args.dim_hidden)
+        self.deepgate_mag = DeepGate_Xmg(dim_hidden=args.dim_hidden)
         self.deepgate_mag.load(dg_ckpt_mag)
         
-        self.deepgate_xag = DeepGate(dim_hidden=args.dim_hidden)
+        self.deepgate_xag = DeepGate_Xag(dim_hidden=args.dim_hidden)
         self.deepgate_xag.load(dg_ckpt_xag)
         
         # Transformer
@@ -118,6 +122,8 @@ class TopModel(nn.Module):
         current_nodes = mask_indices
         for hop in range(k_hop):
             fanin_nodes, _ = subgraph(current_nodes, G.edge_index, dim=1)
+            mask_indices = mask_indices.to('cpu')
+            fanin_nodes = fanin_nodes.to('cpu')
             fanin_nodes = torch.unique(fanin_nodes)
             current_nodes = fanin_nodes
             mask_flag[fanin_nodes] = True
@@ -130,7 +136,6 @@ class TopModel(nn.Module):
 
     def forward(self, G):
         self.device = next(self.parameters()).device
-        
         # Get PM and AIG tokens
         # pm_hs, pm_hf = self.deepcell(G)
         # pm_tokens = torch.cat([pm_hs, pm_hf], dim=1)
@@ -195,7 +200,7 @@ class TopModel(nn.Module):
         for batch_id in range(G.batch.max().item() + 1): 
             # batch_pm_tokens_masked = pm_tokens_masked[G.batch == batch_id]
             batch_aig_tokens = aig_tokens[G.aig_batch == batch_id]
-            batch_mig_tokens = mig_tokens[G.mig_batch == batch_id]
+            batch_mig_tokens = mig_tokens[G.batch == batch_id]
             batch_mag_tokens = mag_tokens[G.mag_batch == batch_id]
             batch_xag_tokens = xag_tokens[G.xag_batch == batch_id]
             
@@ -205,7 +210,7 @@ class TopModel(nn.Module):
                 batch_masked_tokens = masked_tokens[G.aig_batch == batch_id]
             elif selected_modality == 'mig':
                 other_tokens = torch.cat([batch_aig_tokens, batch_mag_tokens, batch_xag_tokens], dim=0)
-                batch_masked_tokens = masked_tokens[G.mig_batch == batch_id]
+                batch_masked_tokens = masked_tokens[G.batch == batch_id]
             elif selected_modality == 'mag':
                 other_tokens = torch.cat([batch_aig_tokens, batch_mig_tokens, batch_xag_tokens], dim=0)
                 batch_masked_tokens = masked_tokens[G.mag_batch == batch_id]

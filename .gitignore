@@ -14,3 +14,7 @@ data
 
 tmp.py
 debug.py
+dataset_ai4eda.tar.bz2
+datasets/train_508_1.npz
+datasets/merged_all.npz
+dataset_ai4eda.tar.bz2
