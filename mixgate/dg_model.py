@@ -90,8 +90,10 @@ class Model(nn.Module):
                 l_and_node = G.aig_forward_index[layer_mask & and_mask]
                 if l_and_node.size(0) > 0:
                     and_edge_index, and_edge_attr = subgraph(l_and_node, edge_index, dim=1)
-                    
-                    
+                    print("layer_mask =", layer_mask)
+                    print("and_edge_index =", torch.tensor(and_edge_index, dtype=torch.float32).shape)
+                    print("and_edge_attr =", and_edge_attr)
+                    print("hs =", hs.shape)
                     # Update structure hidden state
                     msg = self.aggr_and_strc(hs, and_edge_index, and_edge_attr)
                     and_msg = torch.index_select(msg, dim=0, index=l_and_node)
