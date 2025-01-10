@@ -188,7 +188,7 @@ def generate_orthogonal_vectors(n, dim):
 
     return vectors
 
-def generate_hs_init(G, hs, no_dim, aig=False):
+def generate_hs_init(G, hs, no_dim, aig=False, mig=False, xmg=False, xag=False):
     
     if aig: 
         if G.aig_batch == None:
@@ -204,9 +204,25 @@ def generate_hs_init(G, hs, no_dim, aig=False):
             pi_vec = generate_orthogonal_vectors(len(pi_node), no_dim)
             pi_vec = np.array(pi_vec, dtype=np.float32)
             hs[pi_node] = torch.tensor(pi_vec, dtype=torch.float)
-    else:
+
+    if xmg:
         if G.batch == None:
             batch_size = 1
+        else:
+            batch_size = G.xmg_batch.max().item() + 1
+        for batch_idx in range(batch_size):
+            if G.batch == None:
+                pi_mask = (G.xmg_forward_level == 0)
+            else:
+                pi_mask = (G.xmg_batch == batch_idx) & (G.xmg_forward_level == 0)
+            pi_node = G.xmg_forward_index[pi_mask]
+            pi_vec = generate_orthogonal_vectors(len(pi_node), no_dim)
+            pi_vec = np.array(pi_vec, dtype=np.float32)
+            hs[pi_node] = torch.tensor(pi_vec, dtype=torch.float)
+
+    if mig:
+        if G.batch == None:
+                batch_size = 1
         else:
             batch_size = G.batch.max().item() + 1
         for batch_idx in range(batch_size):
@@ -218,5 +234,19 @@ def generate_hs_init(G, hs, no_dim, aig=False):
             pi_vec = generate_orthogonal_vectors(len(pi_node), no_dim)
             pi_vec = np.array(pi_vec, dtype=np.float32)
             hs[pi_node] = torch.tensor(pi_vec, dtype=torch.float)
-    
+
+    if xag:
+        if G.batch == None:
+                batch_size = 1
+        else:
+            batch_size = G.xag_batch.max().item() + 1
+        for batch_idx in range(batch_size):
+            if G.batch == None:
+                pi_mask = (G.xag_forward_level == 0)
+            else:
+                pi_mask = (G.xag_batch == batch_idx) & (G.xag_forward_level == 0)
+            pi_node = G.xag_forward_index[pi_mask]
+            pi_vec = generate_orthogonal_vectors(len(pi_node), no_dim)
+            pi_vec = np.array(pi_vec, dtype=np.float32)
+            hs[pi_node] = torch.tensor(pi_vec, dtype=torch.float)    
     return hs

@@ -8,18 +8,18 @@ from .data_utils import construct_node_feature
 from .dag_utils import return_order_info
         
 class OrderedData(Data):
-    def __init__(self, mig_edge_index=None, mig_x=None, y=None, \
+    def __init__(self, edge_index=None, x=None, y=None, \
                  forward_level=None, forward_index=None, backward_level=None, backward_index=None):
         super().__init__()
-        self.mig_edge_index = mig_edge_index
+        self.edge_index = edge_index
         #self.tt_pair_index = tt_pair_index
-        self.mig_x = mig_x
-        self.mig_prob = y
+        self.x = x
+        self.prob = y
         #self.tt_dis = tt_dis
-        self.mig_forward_level = forward_level
-        self.mig_forward_index = forward_index
-        self.mig_backward_level = backward_level
-        self.mig_backward_index = backward_index
+        self.forward_level = forward_level
+        self.forward_index = forward_index
+        self.backward_level = backward_level
+        self.backward_index = backward_index
     
     def __inc__(self, key, value, *args, **kwargs):
         if 'index' in key or 'face' in key:
@@ -84,7 +84,7 @@ def parse_pyg_mlpgate(x, edge_index,\
     #                     tt_pair_index=tt_pair_index, tt_dis=tt_dis, 
     #                     forward_level=forward_level, forward_index=forward_index, 
     #                     backward_level=backward_level, backward_index=backward_index)
-    graph = OrderedData(mig_x=x_torch, mig_edge_index=edge_index, y=prob,
+    graph = OrderedData(x=x_torch, edge_index=edge_index, y=prob,
                         forward_level=forward_level, forward_index=forward_index, 
                         backward_level=backward_level, backward_index=backward_index)
     graph.use_edge_attr = False
@@ -93,8 +93,8 @@ def parse_pyg_mlpgate(x, edge_index,\
     #     graph.connect_label = connect_label
     #     graph.connect_pair_index = connect_pair_index
 
-    graph.mig_gate = torch.tensor(x[:, 1:2], dtype=torch.float)
-    graph.mig_prob = torch.tensor(prob).reshape((len(x)))
+    graph.gate = torch.tensor(x[:, 1:2], dtype=torch.float)
+    graph.prob = torch.tensor(prob).reshape((len(x)))
 
     return graph
 

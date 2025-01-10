@@ -105,7 +105,8 @@ class NpzParser_Pair():
                         prob, 
                     )
                     graph.num_nodes = len(x)
-                    graph.mig_batch = torch.zeros(len(graph.mig_x), dtype=torch.long)
+                    graph.batch = torch.zeros(len(graph.x), dtype=torch.long)
+
                     #xmg:
                     xmg_edge_index =  torch.tensor(circuits[cir_name]["xmg_edge_index"], dtype=torch.long).t().contiguous()
                     xmg_x = circuits[cir_name]["xmg_x"]
