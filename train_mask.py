@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # here,we need to build some npz formate including mig,xmg,xag,aig fusion graph
 
     # circuit_path = 'datasets/pair_graphs.npz'
-    circuit_path ='/home/jwt/MixGate/datasets/merged_all.npz'
+    circuit_path ='/home/wjx/MixGate1/data/lcm/graphs.npz'
 
     num_epochs = args.num_epochs
     
@@ -36,10 +36,10 @@ if __name__ == '__main__':
     model = mixgate.top_model.TopModel(
         args, 
         # dc_ckpt='./ckpt/dc.pth', 
-        dg_ckpt_aig='/home/jwt/MixGate/ckpt/model_aig_gpu.pth',
-        dg_ckpt_xag='/home/jwt/MixGate/ckpt/model_xag_gpu.pth',
-        dg_ckpt_mag='/home/jwt/MixGate/ckpt/model_xmg_gpu.pth',
-        dg_ckpt_mig='/home/jwt/MixGate/ckpt/model_mig_gpu.pth'
+        dg_ckpt_aig='/home/wjx/MixGate/ckpt/model_aig_gpu.pth',
+        dg_ckpt_xag='/home/wjx/MixGate/ckpt/model_xag_gpu.pth',
+        dg_ckpt_mag='/home/wjx/MixGate/ckpt/model_xmg_gpu.pth',
+        dg_ckpt_mig='/home/wjx/MixGate/ckpt/model_mig_gpu.pth'
     )
     
     trainer = mixgate.top_trainer.TopTrainer(args, model, distributed=False)

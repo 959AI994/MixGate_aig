@@ -75,7 +75,10 @@ class NpzParser_Pair():
             circuits = read_npz_file(self.circuit_path)['circuits'].item()
             j = 0
             for cir_idx, cir_name in enumerate(circuits):
-                if len(circuits[cir_name]) == 16:
+                # if len(circuits[cir_name]) != 16:
+                #     print(f"Skipping circuit {cir_name} with length {len(circuits[cir_name])}")
+        
+                if len(circuits[cir_name]) == 17:
                     print('Parse circuit: {}, {:} / {:} = {:.2f}%'.format(cir_name, cir_idx+1, len(circuits), (cir_idx+1) / len(circuits) *100))
                     
                     #mig:
