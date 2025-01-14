@@ -12,6 +12,12 @@ from torch_geometric.loader import DataLoader
 from .arch.mlp import MLP
 from .utils.utils import zero_normalization, AverageMeter, get_function_acc
 from .utils.logger import Logger
+import torch.distributed as dist
+
+# local_rank = int(os.environ['LOCAL_RANK'])
+
+# # 设置本地进程使用的 GPU
+# device = torch.device(f"cuda:{local_rank}" if torch.cuda.is_available() else "cpu")
 
 class TopTrainer():
     def __init__(self,

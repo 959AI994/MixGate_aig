@@ -8,6 +8,18 @@ import os
 from config import get_parse_args
 import mixgate.top_model
 import mixgate.top_trainer 
+import torch.distributed as dist
+
+
+# # 获取 local_rank 环境变量，代表当前进程的 GPU
+# local_rank = int(os.environ['LOCAL_RANK'])
+
+# # 设置每个进程使用的 GPU
+# torch.cuda.set_device(local_rank)
+# device = torch.device(f"cuda:{local_rank}" if torch.cuda.is_available() else "cpu")
+
+# # 初始化分布式训练
+# dist.init_process_group(backend='nccl', init_method='env://')
 
 # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 DATA_DIR = './data/dg_pair'
@@ -42,7 +54,12 @@ if __name__ == '__main__':
         dg_ckpt_mig='/home/wjx/MixGate/ckpt/model_mig_gpu.pth'
     )
     
-    trainer = mixgate.top_trainer.TopTrainer(args, model, distributed=False)
+    # model.to(device)  # 将模型移到正确的设备
+
+    # # 使用 DistributedDataParallel
+    # model = nn.parallel.DistributedDataParallel(model, device_ids=[local_rank])
+
+    trainer = mixgate.top_trainer.TopTrainer(args, model, distributed=True)
     trainer.set_training_args(lr=1e-4, lr_step=50)
     print('[INFO] Stage 1 Training ...')
     trainer.train(num_epochs, train_dataset, val_dataset)
