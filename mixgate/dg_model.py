@@ -60,7 +60,7 @@ class Model(nn.Module):
         num_nodes = len(G.aig_gate)
         num_layers_f = max(G.aig_forward_level).item() + 1
         num_layers_b = max(G.aig_backward_level).item() + 1
-        
+
         # initialize the structure hidden state
         if self.enable_encode:
             hs = torch.zeros(num_nodes, self.dim_hidden)
@@ -86,6 +86,11 @@ class Model(nn.Module):
                 # forward layer
                 layer_mask = G.aig_forward_level == level
 
+                # debug
+                # print("G.aig_forward_index max:", G.aig_forward_index.max().item())
+                # print("G.aig_forward_index min:", G.aig_forward_index.min().item())
+                # print("Number of nodes:", num_nodes)
+                
                 # AND Gate
                 l_and_node = G.aig_forward_index[layer_mask & and_mask]
                 if l_and_node.size(0) > 0:
@@ -94,6 +99,14 @@ class Model(nn.Module):
                     print("and_edge_index =", torch.tensor(and_edge_index, dtype=torch.float32).shape)
                     print("and_edge_attr =", and_edge_attr)
                     print("hs =", hs.shape)
+                    # # debug
+                    # 检查节点索引
+                    if l_and_node.max() >= hs.shape[0] or l_and_node.min() < 0:
+                        raise ValueError(f"Invalid l_and_node indices: {l_and_node}") 
+                    # print(f"hs.shape: {hs.shape}")
+                    # print(f"and_edge_index: {and_edge_index}, max: {and_edge_index.max()}, min: {and_edge_index.min()}")
+                    # print(f"and_edge_attr: {and_edge_attr}, shape: {and_edge_attr.shape if and_edge_attr is not None else None}")
+
                     # Update structure hidden state
                     msg = self.aggr_and_strc(hs, and_edge_index, and_edge_attr)
                     and_msg = torch.index_select(msg, dim=0, index=l_and_node)
@@ -111,6 +124,10 @@ class Model(nn.Module):
                 l_not_node = G.aig_forward_index[layer_mask & not_mask]
                 if l_not_node.size(0) > 0:
                     not_edge_index, not_edge_attr = subgraph(l_not_node, edge_index, dim=1)
+                    print("layer_mask =", layer_mask)
+                    print("not_edge_index =", torch.tensor(and_edge_index, dtype=torch.float32).shape)
+                    print("not_edge_attr =", and_edge_attr)
+                    print("hs =", hs.shape)
                     # Update structure hidden state
                     msg = self.aggr_not_strc(hs, not_edge_index, not_edge_attr)
                     not_msg = torch.index_select(msg, dim=0, index=l_not_node)
@@ -130,6 +147,12 @@ class Model(nn.Module):
         node_embedding = node_state.squeeze(0)
         hs = node_embedding[:, :self.dim_hidden]
         hf = node_embedding[:, self.dim_hidden:]
+
+          # debug
+        print(f"hs.shape: {hs.shape}")
+        print(f"hf.shape: {hf.shape}")
+        print(f"l_and_node: {l_and_node}, max: {l_and_node.max()}, min: {l_and_node.min()}")
+        print(f"and_edge_index: {and_edge_index}, max: {and_edge_index.max()}, min: {and_edge_index.min()}")
 
         return hs, hf
     

@@ -20,15 +20,47 @@ class OrderedData(Data):
         self.forward_index = forward_index
         self.backward_level = backward_level
         self.backward_index = backward_index
+    # def __init__(self, **kwargs):
+    #     super().__init__()
+    #     for key, value in kwargs.items():
+    #         setattr(self, key, value)
     
+    # def __inc__(self, key, value, *args, **kwargs):
+    #     if 'index' in key or 'face' in key:
+    #         return self.num_nodes
+        
+    #     if key == 'aig_batch': 
+    #         return 1
+    #     if key == 'xag_batch': 
+    #         return 2
+    #     if key == 'xmg_batch': 
+    #         return 3
+    #     # if key in {'aig_batch', 'xag_batch', 'xmg_batch'}:
+    #     #     return 1  # 按批次增量
+        
+    #     else:
+    #         return 0
+
     def __inc__(self, key, value, *args, **kwargs):
         if 'index' in key or 'face' in key:
-            return self.num_nodes
-        if key == 'aig_batch': 
+            # 返回当前图中节点数，按模态区分
+            if 'aig' in key:
+                return len(self.aig_x)  # AIG 模态的节点数
+            elif 'xag' in key:
+                return len(self.xag_x)  # XAG 模态的节点数
+            elif 'xmg' in key:
+                return len(self.xmg_x)  # XMG 模态的节点数
+            else:
+                return self.num_nodes  # 默认节点数（MIG）
+        # 如果是批次相关的字段
+        if key == 'aig_batch':
             return 1
-        else:
-            return 0
-
+        elif key == 'xag_batch':
+            return 2
+        elif key == 'xmg_batch':
+            return 3
+        return 0  # 默认返回 0
+    
     def __cat_dim__(self, key, value, *args, **kwargs):
         if 'forward_index' in key or 'backward_index' in key:
             return 0
@@ -45,6 +77,8 @@ class OrderedData(Data):
 #                         no_nodes, backward_index, \
 #                         no_label = False
 #                         ):
+
+
 def parse_pyg_mlpgate(x, edge_index,\
                         prob, \
 
@@ -72,6 +106,8 @@ def parse_pyg_mlpgate(x, edge_index,\
     
     edge_index = torch.tensor(edge_index, dtype=torch.long)
     edge_index = edge_index.t().contiguous()
+    
+
     forward_level, forward_index, backward_level, backward_index = return_order_info(edge_index, x_torch.size(0))
 
     forward_level = torch.tensor(forward_level)
@@ -97,4 +133,5 @@ def parse_pyg_mlpgate(x, edge_index,\
     graph.prob = torch.tensor(prob).reshape((len(x)))
 
     return graph
+
 
