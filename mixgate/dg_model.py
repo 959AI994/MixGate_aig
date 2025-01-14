@@ -95,10 +95,10 @@ class Model(nn.Module):
                 l_and_node = G.aig_forward_index[layer_mask & and_mask]
                 if l_and_node.size(0) > 0:
                     and_edge_index, and_edge_attr = subgraph(l_and_node, edge_index, dim=1)
-                    print("layer_mask =", layer_mask)
-                    print("and_edge_index =", torch.tensor(and_edge_index, dtype=torch.float32).shape)
-                    print("and_edge_attr =", and_edge_attr)
-                    print("hs =", hs.shape)
+                    # print("layer_mask =", layer_mask)
+                    # print("and_edge_index =", torch.tensor(and_edge_index, dtype=torch.float32).shape)
+                    # print("and_edge_attr =", and_edge_attr)
+                    # print("hs =", hs.shape)
                     # # debug
                     # 检查节点索引
                     if l_and_node.max() >= hs.shape[0] or l_and_node.min() < 0:
@@ -149,10 +149,10 @@ class Model(nn.Module):
         hf = node_embedding[:, self.dim_hidden:]
 
           # debug
-        print(f"hs.shape: {hs.shape}")
-        print(f"hf.shape: {hf.shape}")
-        print(f"l_and_node: {l_and_node}, max: {l_and_node.max()}, min: {l_and_node.min()}")
-        print(f"and_edge_index: {and_edge_index}, max: {and_edge_index.max()}, min: {and_edge_index.min()}")
+        # print(f"hs.shape: {hs.shape}")
+        # print(f"hf.shape: {hf.shape}")
+        # print(f"l_and_node: {l_and_node}, max: {l_and_node.max()}, min: {l_and_node.min()}")
+        # print(f"and_edge_index: {and_edge_index}, max: {and_edge_index.max()}, min: {and_edge_index.min()}")
 
         return hs, hf
     

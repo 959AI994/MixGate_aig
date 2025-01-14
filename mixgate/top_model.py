@@ -139,7 +139,7 @@ class TopModel(nn.Module):
         # Get PM and AIG tokens
         # pm_hs, pm_hf = self.deepcell(G)
         # pm_tokens = torch.cat([pm_hs, pm_hf], dim=1)
-        # mcm_pm_tokens = torch.zeros(0, self.args.dim_hidden * 2).to(self.device)
+        mcm_predicted_tokens = torch.zeros(0, self.args.dim_hidden * 2).to(self.device)
 
         # aig_hs, aig_hf = self.deepgate(G)
         # aig_hs = aig_hs.detach()
@@ -182,7 +182,8 @@ class TopModel(nn.Module):
             'xag': (xag_tokens, xag_hf, self.deepgate_xag),
         }
         # 随机选择一个模态
-        selected_modality = modalities[torch.randint(0, len(modalities), (1,)).item()]
+        # selected_modality = modalities[torch.randint(0, len(modalities), (1,)).item()]
+        selected_modality = 'mig'
         selected_tokens, masked_hf, encoder = tokens_dict[selected_modality]
         # 对选定模态进行掩码
         masked_tokens, mask_indices = self.mask_tokens(G, selected_tokens, self.mask_ratio, k_hop=4)
