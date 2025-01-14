@@ -96,13 +96,8 @@ class NpzParser_Pair():
                     tt_pair_index = None
                     connect_label = None
                     connect_pair_index = None
-                    # graph = parse_pyg_mlpgate(
-                    #     x, edge_index, tt_dis, tt_pair_index, is_pi,
-                    #     prob, no_edges, connect_label, connect_pair_index,
-                    #     backward_level, forward_index, forward_level,
-                    #     no_nodes, backward_index, 
-                    #     no_label=True
-                    # )
+
+
                     graph = parse_pyg_mlpgate(
                         x, edge_index, 
                         prob, 
@@ -153,20 +148,7 @@ class NpzParser_Pair():
                     graph.name = cir_name
                     data_list.append(graph)
                     #print("data_list =", len(data_list))
-
-            # while j < len(data_list):
-            #     for i in range(len(data_list)):
-            #         current_batch = data_list[:i+1]
-            #         try:
-            #             data, slices = self.collate(current_batch)
-            #             print(f"Batch {i} processed successfully.")
-            #             j += 1
-            #         except Exception as e:
-            #             print(f"Error processing Batch {i}: {e}")
-            #             print("data_list =", data_list[i])
-            #             del data_list[i]
-            #             break
-                
+             
             data, slices = self.collate(data_list)
             torch.save((data, slices), self.processed_paths[0])
             print('[INFO] Inmemory dataset save: ', self.processed_paths[0])
