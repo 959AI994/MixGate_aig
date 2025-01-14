@@ -38,7 +38,7 @@ if __name__ == '__main__':
         # dc_ckpt='./ckpt/dc.pth', 
         dg_ckpt_aig='/home/wjx/MixGate/ckpt/model_aig_gpu.pth',
         dg_ckpt_xag='/home/wjx/MixGate/ckpt/model_xag_gpu.pth',
-        dg_ckpt_mag='/home/wjx/MixGate/ckpt/model_xmg_gpu.pth',
+        dg_ckpt_xmg='/home/wjx/MixGate/ckpt/model_xmg_gpu.pth',
         dg_ckpt_mig='/home/wjx/MixGate/ckpt/model_mig_gpu.pth'
     )
     
