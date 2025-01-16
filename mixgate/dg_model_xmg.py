@@ -40,11 +40,15 @@ class Model(nn.Module):
         self.aggr_not_strc = TFMlpAggr(self.dim_hidden*1, self.dim_hidden)
         self.aggr_and_func = TFMlpAggr(self.dim_hidden*2, self.dim_hidden)
         self.aggr_not_func = TFMlpAggr(self.dim_hidden*1, self.dim_hidden)
+        self.aggr_xor_strc = TFMlpAggr(self.dim_hidden*1, self.dim_hidden)
+        self.aggr_xor_func = TFMlpAggr(self.dim_hidden*2, self.dim_hidden)
             
         self.update_and_strc = GRU(self.dim_hidden, self.dim_hidden)
         self.update_and_func = GRU(self.dim_hidden, self.dim_hidden)
         self.update_not_strc = GRU(self.dim_hidden, self.dim_hidden)
         self.update_not_func = GRU(self.dim_hidden, self.dim_hidden)
+        self.update_xor_strc = GRU(self.dim_hidden, self.dim_hidden)
+        self.update_xor_func = GRU(self.dim_hidden, self.dim_hidden)
 
         # Readout 
         self.readout_prob = MLP(self.dim_hidden, self.dim_mlp, 1, num_layer=3, p_drop=0.2, norm_layer='batchnorm', act_layer='relu')
@@ -136,16 +140,16 @@ class Model(nn.Module):
                     
                     
                     # Update structure hidden state
-                    msg = self.aggr_and_strc(hs, xor_edge_index, xor_edge_attr)
+                    msg = self.aggr_xor_strc(hs, xor_edge_index, xor_edge_attr)
                     xor_msg = torch.index_select(msg, dim=0, index=l_xor_node)
                     hs_xor = torch.index_select(hs, dim=0, index=l_xor_node)
-                    _, hs_xor = self.update_and_strc(xor_msg.unsqueeze(0), hs_xor.unsqueeze(0))
+                    _, hs_xor = self.update_xor_strc(xor_msg.unsqueeze(0), hs_xor.unsqueeze(0))
                     hs[l_xor_node, :] = hs_xor.squeeze(0)
                     # Update function hidden state
-                    msg = self.aggr_and_func(node_state, xor_edge_index, xor_edge_attr)
+                    msg = self.aggr_xor_func(node_state, xor_edge_index, xor_edge_attr)
                     xor_msg = torch.index_select(msg, dim=0, index=l_xor_node)
                     hs_xor = torch.index_select(hf, dim=0, index=l_xor_node)
-                    _, hs_xor = self.update_and_func(xor_msg.unsqueeze(0), hs_xor.unsqueeze(0))
+                    _, hs_xor = self.update_xor_func(xor_msg.unsqueeze(0), hs_xor.unsqueeze(0))
                     hf[l_xor_node, :] = hs_xor.squeeze(0)
                 
                 
