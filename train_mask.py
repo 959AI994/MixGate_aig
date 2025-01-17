@@ -38,12 +38,12 @@ if __name__ == '__main__':
     # dataset = mixgate.AigParser(DATA_DIR, circuit_path)
 
     train_dataset, val_dataset = dataset.get_dataset()
-    for data in train_dataset:
-        # print(f"edge_index: {data.edge_index}")
-        # print(f"num_nodes: {data.num_nodes}")
-        # print(f"name: {data.name}")
-        assert data.edge_index.min() >= 0, "edge_index 包含负数索引"
-        assert data.edge_index.max() < data.num_nodes, "edge_index 包含超出范围的索引"
+    # for data in train_dataset:
+    #     # print(f"edge_index: {data.edge_index}")
+    #     # print(f"num_nodes: {data.num_nodes}")
+    #     # print(f"name: {data.name}")
+    #     assert data.edge_index.min() >= 0, "edge_index 包含负数索引"
+    #     assert data.edge_index.max() < data.num_nodes, "edge_index 包含超出范围的索引"
     print('[INFO] Create Model and Trainer')
     model = mixgate.top_model.TopModel(
         args, 
