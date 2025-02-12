@@ -3,13 +3,13 @@ import os
 
 # 文件路径列表
 data_paths = [
-    ('/home/jwt/1/mig_npz/graphs.npz', '/home/jwt/1/mig_npz/labels.npz', '/home/jwt/DeepMap_Dataset/graph_label_npz/merged_mig_graphs.npz'),
-    ('/home/jwt/1/xmg_npz/graphs.npz', '/home/jwt/1/xmg_npz/labels.npz', '/home/jwt/DeepMap_Dataset/graph_label_npz/merged_xmg_graphs.npz'),
-    ('/home/jwt/1/xag_npz/graphs.npz', '/home/jwt/1/xag_npz/labels.npz', '/home/jwt/DeepMap_Dataset/graph_label_npz/merged_xag_graphs.npz'),
+    ('/home/wjx/npz/final_data/newest_npz/mig_npz/graphs.npz', '/home/wjx/npz/final_data/newest_npz/mig_npz/labels.npz', '/home/wjx/npz/final_data/newest_npz/mig_npz/graphs1.npz'),
+    ('/home/wjx/npz/final_data/newest_npz/xmg_npz/graphs.npz', '/home/wjx/npz/final_data/newest_npz/xmg_npz/labels.npz', '/home/wjx/npz/final_data/newest_npz/xmg_npz/graphs1.npz'),
+    ('/home/wjx/npz/final_data/newest_npz/xag_npz/graphs.npz', '/home/wjx/npz/final_data/newest_npz/xag_npz/labels.npz', '/home/wjx/npz/final_data/newest_npz/xag_npz/graphs1.npz'),
 ]
 
-output_paths = ['/home/jwt/DeepMap_Dataset/graph_label_npz/merged_mig_graphs.npz', '/home/jwt/DeepMap_Dataset/graph_label_npz/merged_xmg_graphs.npz', '/home/jwt/DeepMap_Dataset/graph_label_npz/merged_xag_graphs.npz', '/home/jwt/1/aig_npz/aig_graphs.npz']
-final_output_path = '/home/jwt/MixGate/datasets/merged_all.npz'
+output_paths = ['/home/wjx/npz/final_data/newest_npz/mig_npz/graphs1.npz', '/home/wjx/npz/final_data/newest_npz/xmg_npz/graphs1.npz', '/home/wjx/npz/final_data/newest_npz/xag_npz/graphs1.npz', '/home/wjx/npz/final_data/newest_npz/aig_npz/graphs.npz']
+final_output_path = '/home/wjx/npz/final_data/newest_npz/merged_all.npz'
 # aiggraph_path = ['/home/jwt/1/aig_npz/aig_graphs.npz']
 
 # 合并函数
