@@ -83,9 +83,12 @@ class Model(nn.Module):
 
         #print("G.gate =", G.gate)
         node_state = torch.cat([hs, hf], dim=-1)
-        and_mask = G.xag_gate.squeeze(1) == 1 #判断门的种类
-        not_mask = G.xag_gate.squeeze(1) == 2
-        xor_mask = G.xag_gate.squeeze(1) == 3     
+        not_mask = G.gate.squeeze(1) == 2  # NOT门的掩码
+        and_mask = G.gate.squeeze(1) == 3  # AND门的掩码
+        or_mask = G.gate.squeeze(1) == 4   # OR门的掩码
+        maj_mask = G.gate.squeeze(1) == 1  # MAJ门的掩码
+        xor_mask = G.gate.squeeze(1) == 5  # XOR门的掩码
+  
         # print("xor_mask =", xor_mask)
         
 
