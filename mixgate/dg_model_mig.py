@@ -51,7 +51,7 @@ class Model(nn.Module):
         self.update_and_strc = GRU(self.dim_hidden, self.dim_hidden)
         self.update_and_func = GRU(self.dim_hidden, self.dim_hidden)
         self.update_not_strc = GRU(self.dim_hidden, self.dim_hidden)
-        # self.update_not_func = GRU(self.dim_hidden, self.dim_hidden)
+        self.update_not_func = GRU(self.dim_hidden, self.dim_hidden)
         
         self.update_or_strc = GRU(self.dim_hidden, self.dim_hidden)
         self.update_or_func = GRU(self.dim_hidden, self.dim_hidden)
@@ -88,6 +88,8 @@ class Model(nn.Module):
         hf = hf.to(device)
         
         edge_index = G.edge_index
+
+        # print("[debug] G attributes:", dir(G))  # 打印 G 的所有属性
 
         node_state = torch.cat([hs, hf], dim=-1)
         not_mask = G.gate.squeeze(1) == 2  # NOT门的掩码

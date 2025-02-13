@@ -29,7 +29,7 @@ if __name__ == '__main__':
     # here,we need to build some npz formate including mig,xmg,xag,aig fusion graph
 
     # circuit_path = 'datasets/pair_graphs.npz'
-    circuit_path ='/home/wjx/MixGate1/data/lcm/merged_all.npz'
+    circuit_path ='/home/xqgrp/wangjingxin/datasets/mixgate_data/merged_all.npz'
 
     num_epochs = args.num_epochs
     
@@ -48,10 +48,10 @@ if __name__ == '__main__':
     model = mixgate.top_model.TopModel(
         args, 
         # dc_ckpt='./ckpt/dc.pth', 
-        dg_ckpt_aig='/home/wjx/MixGate/ckpt/model_aig.pth',
-        dg_ckpt_xag='/home/wjx/MixGate/ckpt/model_xag.pth',
-        dg_ckpt_xmg='/home/wjx/MixGate/ckpt/model_xmg.pth',
-        dg_ckpt_mig='/home/wjx/MixGate/ckpt/model_mig.pth'
+        dg_ckpt_aig='/home/xqgrp/wangjingxin/pythonproject/MixGate/ckpt/model_aig.pth',
+        dg_ckpt_xag='/home/xqgrp/wangjingxin/pythonproject/MixGate/ckpt/model_xag.pth',
+        dg_ckpt_xmg='/home/xqgrp/wangjingxin/pythonproject/MixGate/ckpt/model_xmg.pth',
+        dg_ckpt_mig='/home/xqgrp/wangjingxin/pythonproject/MixGate/ckpt/model_mig.pth'
     )
     
     # model.to(device)  # 将模型移到正确的设备

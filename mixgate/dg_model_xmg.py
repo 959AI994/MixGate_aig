@@ -93,20 +93,20 @@ class Model(nn.Module):
         #print("G.gate =", G.gate)
         # 获取每种门的掩码
         node_state = torch.cat([hs, hf], dim=-1)
-        not_mask = G.gate.squeeze(1) == 2  # NOT门的掩码
-        and_mask = G.gate.squeeze(1) == 3  # AND门的掩码
-        or_mask = G.gate.squeeze(1) == 4   # OR门的掩码
-        maj_mask = G.gate.squeeze(1) == 1  # MAJ门的掩码
-        xor_mask = G.gate.squeeze(1) == 5  # XOR门的掩码
+        not_mask = G.xmg_gate.squeeze(1) == 2  # NOT门的掩码
+        and_mask = G.xmg_gate.squeeze(1) == 3  # AND门的掩码
+        or_mask = G.xmg_gate.squeeze(1) == 4   # OR门的掩码
+        maj_mask = G.xmg_gate.squeeze(1) == 1  # MAJ门的掩码
+        xor_mask = G.xmg_gate.squeeze(1) == 5  # XOR门的掩码
 
 
         for _ in range(self.num_rounds):
             for level in range(1, num_layers_f):
                 # 正向传播的层
-                layer_mask = G.forward_level == level  # 获取目标层级的mask
+                layer_mask = G.xmg_forward_level == level  # 获取目标层级的mask
 
                 # AND Gate
-                l_and_node = G.forward_index[layer_mask & and_mask]
+                l_and_node = G.xmg_forward_index[layer_mask & and_mask]
                 if l_and_node.size(0) > 0:
                     and_edge_index, and_edge_attr = subgraph(l_and_node, edge_index, dim=1)
                     # 更新结构隐藏状态
@@ -123,7 +123,7 @@ class Model(nn.Module):
                     hf[l_and_node, :] = hf_and.squeeze(0)
 
                 # NOT Gate
-                l_not_node = G.forward_index[layer_mask & not_mask]
+                l_not_node = G.xmg_forward_index[layer_mask & not_mask]
                 if l_not_node.size(0) > 0:
                     not_edge_index, not_edge_attr = subgraph(l_not_node, edge_index, dim=1)
                     # 更新结构隐藏状态
@@ -140,7 +140,7 @@ class Model(nn.Module):
                     hf[l_not_node, :] = hf_not.squeeze(0)
 
                 # XOR Gate
-                l_xor_node = G.forward_index[layer_mask & xor_mask]
+                l_xor_node = G.xmg_forward_index[layer_mask & xor_mask]
                 if l_xor_node.size(0) > 0:
                     xor_edge_index, xor_edge_attr = subgraph(l_xor_node, edge_index, dim=1)
                     # 更新结构隐藏状态
@@ -157,7 +157,7 @@ class Model(nn.Module):
                     hf[l_xor_node, :] = hf_xor.squeeze(0)
 
                 # Majority Gate
-                l_maj_node = G.forward_index[layer_mask & maj_mask]
+                l_maj_node = G.xmg_forward_index[layer_mask & maj_mask]
                 if l_maj_node.size(0) > 0:
                     maj_edge_index, maj_edge_attr = subgraph(l_maj_node, edge_index, dim=1)
                     # 更新结构隐藏状态
@@ -174,7 +174,7 @@ class Model(nn.Module):
                     hf[l_maj_node, :] = hf_maj.squeeze(0)
 
                 # OR Gate
-                l_or_node = G.forward_index[layer_mask & or_mask]
+                l_or_node = G.xmg_forward_index[layer_mask & or_mask]
                 if l_or_node.size(0) > 0:
                     or_edge_index, or_edge_attr = subgraph(l_or_node, edge_index, dim=1)
                     # 更新结构隐藏状态

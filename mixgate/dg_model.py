@@ -16,7 +16,7 @@ from .arch.gcn_conv import AggConv
 
 class Model(nn.Module):
     '''
-    Recurrent Graph Neural Networks for Circuits.
+    Recurrent Graph Neural Networks for Circuits.ß
     '''
     def __init__(self, 
                  num_rounds = 1, 
@@ -77,26 +77,42 @@ class Model(nn.Module):
         
         edge_index = G.aig_edge_index
 
-        node_state = torch.cat([hs, hf], dim=-1)
-        not_mask = G.gate.squeeze(1) == 2  # NOT门的掩码
-        and_mask = G.gate.squeeze(1) == 3  # AND门的掩码
-        or_mask = G.gate.squeeze(1) == 4   # OR门的掩码
-        maj_mask = G.gate.squeeze(1) == 1  # MAJ门的掩码
-        xor_mask = G.gate.squeeze(1) == 5  # XOR门的掩码
+        # 调试信息：打印 G.gate 和 G.aig_forward_index 的形状
+        # print("[debug]: G.gate shape =", G.gate.shape)
+        # print("[debug]: G.aig_forward_index shape =", G.aig_forward_index.shape)
+        # print("[debug]: G.aig_forward_level shape =", G.aig_forward_level.shape)
 
+        node_state = torch.cat([hs, hf], dim=-1)
+        not_mask = G.aig_gate.squeeze(1) == 2 # NOT门的掩码
+        and_mask = G.aig_gate.squeeze(1) == 3  # AND门的掩码
+        # or_mask = G.gate.squeeze(1) == 4   # OR门的掩码
+        # maj_mask = G.gate.squeeze(1) == 1  # MAJ门的掩码
+        # xor_mask = G.gate.squeeze(1) == 5  # XOR门的掩码
+
+        # print("[debug]: and_mask的形状:", and_mask.shape)
+        # print("[debug]: and_mask的内容:", and_mask)
 
         for _ in range(self.num_rounds):
             for level in range(1, num_layers_f):
                 # forward layer
                 layer_mask = G.aig_forward_level == level
 
-                # debug
-                # print("G.aig_forward_index max:", G.aig_forward_index.max().item())
-                # print("G.aig_forward_index min:", G.aig_forward_index.min().item())
-                # print("Number of nodes:", num_nodes)
+                # 调试信息：检查 layer_mask 和 and_mask 的形状
+                # print(f"[debug] layer_mask shape: {layer_mask.shape}, and_mask shape: {and_mask.shape}")
+
+                # # AND Gate
+                # print(f"[debug] G.aig_forward_index.shape: {G.aig_forward_index.shape}")
+                # print(f"[debug] layer_mask.shape: {layer_mask.shape}, and_mask.shape: {and_mask.shape}")
                 
-                # AND Gate
+                # # AND Gate
+                # print(f"[debug] G.aig_forward_index.shape: {G.aig_forward_index.shape}")
+                # print(f"[debug] layer_mask.shape: {layer_mask.shape}, and_mask.shape: {and_mask.shape}")
+
                 l_and_node = G.aig_forward_index[layer_mask & and_mask]
+
+                # 调试信息：打印 l_and_node 的形状
+                # print(f"[debug] l_and_node shape: {l_and_node.shape}")
+
                 if l_and_node.size(0) > 0:
                     and_edge_index, and_edge_attr = subgraph(l_and_node, edge_index, dim=1)
                     # print("layer_mask =", layer_mask)
@@ -125,13 +141,14 @@ class Model(nn.Module):
                     hf[l_and_node, :] = hf_and.squeeze(0)
 
                 # NOT Gate
+
                 l_not_node = G.aig_forward_index[layer_mask & not_mask]
                 if l_not_node.size(0) > 0:
                     not_edge_index, not_edge_attr = subgraph(l_not_node, edge_index, dim=1)
-                    print("layer_mask =", layer_mask)
-                    print("not_edge_index =", torch.tensor(and_edge_index, dtype=torch.float32).shape)
-                    print("not_edge_attr =", and_edge_attr)
-                    print("hs =", hs.shape)
+                    # print("layer_mask =", layer_mask)
+                    # print("not_edge_index =", torch.tensor(and_edge_index, dtype=torch.float32).shape)
+                    # print("not_edge_attr =", and_edge_attr)
+                    # print("hs =", hs.shape)
                     # Update structure hidden state
                     msg = self.aggr_not_strc(hs, not_edge_index, not_edge_attr)
                     not_msg = torch.index_select(msg, dim=0, index=l_not_node)
@@ -153,6 +170,7 @@ class Model(nn.Module):
         hf = node_embedding[:, self.dim_hidden:]
 
           # debug
+
         # print(f"hs.shape: {hs.shape}")
         # print(f"hf.shape: {hf.shape}")
         # print(f"l_and_node: {l_and_node}, max: {l_and_node.max()}, min: {l_and_node.min()}")

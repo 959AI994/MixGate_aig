@@ -81,14 +81,19 @@ class Model(nn.Module):
         
         edge_index = G.xag_edge_index
 
-        #print("G.gate =", G.gate)
+        # print("[debug]:G.gate =", G.gate)
+        # # 这里也可以插入调试信息
+        # print("[debug]:G.gate的原始形状:", G.gate.shape)
+
         node_state = torch.cat([hs, hf], dim=-1)
-        not_mask = G.gate.squeeze(1) == 2  # NOT门的掩码
-        and_mask = G.gate.squeeze(1) == 3  # AND门的掩码
-        or_mask = G.gate.squeeze(1) == 4   # OR门的掩码
-        maj_mask = G.gate.squeeze(1) == 1  # MAJ门的掩码
-        xor_mask = G.gate.squeeze(1) == 5  # XOR门的掩码
-  
+        not_mask = G.xag_gate.squeeze(1) == 2  # NOT门的掩码
+        and_mask = G.xag_gate.squeeze(1) == 3  # AND门的掩码
+        or_mask = G.xag_gate.squeeze(1) == 4   # OR门的掩码
+        maj_mask = G.xag_gate.squeeze(1) == 1  # MAJ门的掩码
+        xor_mask = G.xag_gate.squeeze(1) == 5  # XOR门的掩码
+        
+        # print("[debug]: and_mask的形状:", and_mask.shape)
+        # print("[debug]: and_mask的内容:", and_mask)
         # print("xor_mask =", xor_mask)
         
 
