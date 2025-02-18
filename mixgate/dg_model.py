@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import torch
 import os
 from torch import nn
@@ -169,6 +165,9 @@ class Model(nn.Module):
         hs = node_embedding[:, :self.dim_hidden]
         hf = node_embedding[:, self.dim_hidden:]
 
+        # 输出 hs 和 hf 的内容
+        print("[debug] aig_hs:", hs)
+        print("[debug] aig_hf:", hf)
           # debug
 
         # print(f"hs.shape: {hs.shape}")

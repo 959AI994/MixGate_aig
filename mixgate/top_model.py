@@ -19,6 +19,7 @@ from .dg_model_mig import Model as DeepGate_Mig
 from .dg_model_xmg import Model as DeepGate_Xmg
 from .dg_model_xag import Model as DeepGate_Xag
 from .dg_model import Model as DeepGate_Aig
+import numpy as np
 
 
 class TopModel(nn.Module):
@@ -92,6 +93,10 @@ class TopModel(nn.Module):
             masked_tokens, mask_indices = self.mask_tokens(G, xag_tokens, self.mask_ratio, k_hop=4)
             input_tokens = torch.cat([aig_tokens, mig_tokens, xmg_tokens], dim=0)
         
+        print("[debug] mask_indices:", mask_indices)
+        print("[debug] masked_tokens:", masked_tokens)
+
+
         # 将掩码后的 token 与其他模态的 token 拼接
         all_tokens = torch.cat([masked_tokens, input_tokens], dim=0)
         
@@ -229,8 +234,14 @@ class TopModel(nn.Module):
             mcm_predicted_tokens = torch.cat([mcm_predicted_tokens, batch_pred_masked_tokens], dim=0)
         
         # Predict probability 
+        print("[debug] masked_hf:", masked_hf)
         masked_prob = encoder.pred_prob(masked_hf)
-        
+        print("[debug] masked_prob:", masked_prob)
+        # 将 masked_prob 转为 numpy 数组并保存
+        masked_prob_np = masked_prob.cpu().detach().numpy()
+        # 保存到 txt 文件
+        np.savetxt("masked_prob.txt", masked_prob_np)
+
         return mcm_predicted_tokens, mask_indices, selected_tokens, masked_prob
    
 

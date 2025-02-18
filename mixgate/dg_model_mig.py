@@ -187,6 +187,9 @@ class Model(nn.Module):
         hs = node_embedding[:, :self.dim_hidden]
         hf = node_embedding[:, self.dim_hidden:]
 
+        print("[debug] mig_hs:", hs)
+        print("[debug] mig_hf:", hf)
+
         return hs, hf
 
     def pred_prob(self, hf):
