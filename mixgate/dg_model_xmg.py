@@ -197,8 +197,8 @@ class Model(nn.Module):
         hs = node_embedding[:, :self.dim_hidden]
         hf = node_embedding[:, self.dim_hidden:]
 
-        print("[debug] xmg_hs:", hs)
-        print("[debug] xmg_hf:", hf)
+        # print("[debug] xmg_hs:", hs)
+        # print("[debug] xmg_hf:", hf)
 
         return hs, hf
     

@@ -93,8 +93,8 @@ class TopModel(nn.Module):
             masked_tokens, mask_indices = self.mask_tokens(G, xag_tokens, self.mask_ratio, k_hop=4)
             input_tokens = torch.cat([aig_tokens, mig_tokens, xmg_tokens], dim=0)
         
-        print("[debug] mask_indices:", mask_indices)
-        print("[debug] masked_tokens:", masked_tokens)
+        # print("[debug] mask_indices:", mask_indices)
+        # print("[debug] masked_tokens:", masked_tokens)
 
 
         # 将掩码后的 token 与其他模态的 token 拼接
@@ -234,9 +234,10 @@ class TopModel(nn.Module):
             mcm_predicted_tokens = torch.cat([mcm_predicted_tokens, batch_pred_masked_tokens], dim=0)
         
         # Predict probability 
-        print("[debug] masked_hf:", masked_hf)
-        masked_prob = encoder.pred_prob(masked_hf)
-        print("[debug] masked_prob:", masked_prob)
+        # print("[debug] masked_hf:", masked_hf)
+        
+        masked_prob = encoder.pred_prob(masked_hf) # todo：mcm_predicted_tokens
+        # print("[debug] masked_prob:", masked_prob)
         # 将 masked_prob 转为 numpy 数组并保存
         masked_prob_np = masked_prob.cpu().detach().numpy()
         # 保存到 txt 文件

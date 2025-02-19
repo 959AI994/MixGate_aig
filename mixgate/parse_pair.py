@@ -13,12 +13,12 @@ import copy
 from torch_geometric.data import Data, InMemoryDataset
 from torch_geometric.loader import DataLoader
 
-from .utils.data_utils import read_npz_file
-from .utils.aiger_utils import aig_to_xdata
-from .utils.circuit_utils import get_fanin_fanout, read_file, add_node_index, feature_gen_connect
-from .utils.dataset_utils import *
-from .utils.data_utils import construct_node_feature
-from .utils.dag_utils import return_order_info
+from mixgate.utils.data_utils import read_npz_file
+from mixgate.utils.aiger_utils import aig_to_xdata
+from mixgate.utils.circuit_utils import get_fanin_fanout, read_file, add_node_index, feature_gen_connect
+from mixgate.utils.dataset_utils import *
+from mixgate.utils.data_utils import construct_node_feature
+from mixgate.utils.dag_utils import return_order_info
 
 class NpzParser_Pair():
     '''
@@ -78,7 +78,7 @@ class NpzParser_Pair():
                 # if len(circuits[cir_name]) != 16:
                 #     print(f"Skipping circuit {cir_name} with length {len(circuits[cir_name])}")
         
-                if len(circuits[cir_name]) == 17:
+                if len(circuits[cir_name]) == 16:
                     print('Parse circuit: {}, {:} / {:} = {:.2f}%'.format(cir_name, cir_idx+1, len(circuits), (cir_idx+1) / len(circuits) *100))
                     
                     #mig:

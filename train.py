@@ -8,15 +8,15 @@ import os
 from config import get_parse_args
 
 os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-DATA_DIR = './data/lcm'
+DATA_DIR = '/home/xqgrp/wangjingxin/datasets/mixgate_data'
 
 if __name__ == '__main__':
     args = get_parse_args()
-    circuit_path = os.path.join(DATA_DIR, 'graphs.npz')
+    circuit_path = os.path.join(DATA_DIR, 'merged_all.npz')
     num_epochs = 60
     
     print('[INFO] Parse Dataset')
-    dataset = mixgate.NpzParser(DATA_DIR, circuit_path)
+    dataset = mixgate.NpzParser_Pair(DATA_DIR, circuit_path)
     train_dataset, val_dataset = dataset.get_dataset()
     print('[INFO] Create Model and Trainer')
     model = mixgate.Model()

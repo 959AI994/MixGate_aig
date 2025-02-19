@@ -168,8 +168,8 @@ class Model(nn.Module):
         hs = node_embedding[:, :self.dim_hidden]
         hf = node_embedding[:, self.dim_hidden:]
         # 输出 hs 和 hf 的内容
-        print("[debug] xag_hs:", hs)
-        print("[debug] xag_hf:", hf)
+        # print("[debug] xag_hs:", hs)
+        # print("[debug] xag_hf:", hf)
 
         return hs, hf
     
