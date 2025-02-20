@@ -78,7 +78,7 @@ class NpzParser_Pair():
                 # if len(circuits[cir_name]) != 16:
                 #     print(f"Skipping circuit {cir_name} with length {len(circuits[cir_name])}")
         
-                if len(circuits[cir_name]) == 16:
+                if len(circuits[cir_name]) == 17:
                     print('Parse circuit: {}, {:} / {:} = {:.2f}%'.format(cir_name, cir_idx+1, len(circuits), (cir_idx+1) / len(circuits) *100))
                     
                     #mig:
@@ -143,9 +143,9 @@ class NpzParser_Pair():
                     graph.aig_backward_level = torch.tensor(circuits[cir_name]["aig_backward_level"])
                     # graph.aig_gate = torch.tensor(circuits[cir_name]["aig_gate"])
                     graph.aig_batch = torch.zeros(len(graph.aig_x), dtype=torch.long)
-                    graph.aig_gate = torch.tensor(circuits[cir_name]["aig_x"][:, 1:2], dtype=torch.float)
-                    
+                    graph.aig_gate = torch.tensor(circuits[cir_name]["aig_gate"], dtype=torch.float)
                     graph.name = cir_name
+
                     data_list.append(graph)
                     #print("data_list =", len(data_list))
              

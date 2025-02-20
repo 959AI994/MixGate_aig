@@ -157,6 +157,7 @@ class TopModel(nn.Module):
         aig_hf = aig_hf.detach()
         aig_tokens = torch.cat([aig_hs, aig_hf], dim=1)
 
+
         mig_hs, mig_hf = self.deepgate_mig(G)
         mig_hs = mig_hs.detach()
         mig_hf = mig_hf.detach()
@@ -241,9 +242,15 @@ class TopModel(nn.Module):
         # 将 masked_prob 转为 numpy 数组并保存
         masked_prob_np = masked_prob.cpu().detach().numpy()
         # 保存到 txt 文件
-        np.savetxt("masked_prob.txt", masked_prob_np)
+        # np.savetxt("masked_prob.txt", masked_prob_np)
+        
+        # 获取每个模态的预测概率
+        aig_prob = self.deepgate_aig.pred_prob(aig_hf)
+        mig_prob = self.deepgate_mig.pred_prob(mig_hf)
+        xmg_prob = self.deepgate_xmg.pred_prob(xmg_hf)
+        xag_prob = self.deepgate_xag.pred_prob(xag_hf)
 
-        return mcm_predicted_tokens, mask_indices, selected_tokens, masked_prob
+        return mcm_predicted_tokens, mask_indices, selected_tokens, masked_prob,aig_prob, mig_prob, xmg_prob, xag_prob
    
 
     def load(self, model_path):

@@ -127,18 +127,38 @@ class TopTrainer():
             return False
         
     def run_batch(self, batch):
-        mcm_pm_tokens, mask_indices, pm_tokens, pm_prob = self.model(batch)
-        
+        mcm_pm_tokens, mask_indices, pm_tokens, pm_prob,aig_prob, mig_prob, xmg_prob, xag_prob = self.model(batch)
+        # print("batch =", batch)
+        # # 计算每个子模型的损失
+        # prob_loss = self.reg_loss(aig_prob, batch['prob'].unsqueeze(1)) + \
+        #             self.reg_loss(mig_prob, batch['prob'].unsqueeze(1)) + \
+        #             self.reg_loss(xmg_prob, batch['prob'].unsqueeze(1)) + \
+        #             self.reg_loss(xag_prob, batch['prob'].unsqueeze(1))
+        prob_aigloss = self.reg_loss(aig_prob, batch['aig_prob'].unsqueeze(1))
+        prob_migloss = self.reg_loss(mig_prob, batch['prob'].unsqueeze(1))
+        prob_xmgloss = self.reg_loss(xmg_prob, batch['xmg_prob'].unsqueeze(1))
+        prob_xagloss = self.reg_loss(xag_prob, batch['xag_prob'].unsqueeze(1))        
+
         # Task 1: Probability Prediction 
         prob_loss = self.reg_loss(pm_prob, batch['prob'].unsqueeze(1))
         
         # Task 2: Mask PM Circuit Modeling  
         mcm_loss = self.reg_loss(mcm_pm_tokens[mask_indices], pm_tokens[mask_indices])
         
+        # loss_status = {
+        #     'prob_loss': prob_loss,
+        #     'mcm_loss': mcm_loss
+        # }
+        # 返回损失和子模型概率
         loss_status = {
             'prob_loss': prob_loss,
-            'mcm_loss': mcm_loss
+            'mcm_loss': mcm_loss,
+            'aig_prob': prob_aigloss,
+            'mig_prob': prob_migloss,
+            'xmg_prob': prob_xmgloss,
+            'xag_prob': prob_xagloss
         }
+
         return loss_status
     
     def train(self, num_epoch, train_dataset, val_dataset):
@@ -164,7 +184,7 @@ class TopTrainer():
         
         # AverageMeter
         batch_time = AverageMeter()
-        prob_loss_stats, mcm_loss_stats = AverageMeter(), AverageMeter()
+        prob_loss_stats, mcm_loss_stats, prob_loss_aig, prob_loss_mig, prob_loss_xmg, prob_loss_xag = AverageMeter(), AverageMeter(), AverageMeter(), AverageMeter(), AverageMeter(), AverageMeter()
         
         # Train
         print('[INFO] Start training, lr = {:.4f}'.format(self.optimizer.param_groups[0]['lr']))
@@ -187,6 +207,13 @@ class TopTrainer():
                     # Get loss
                     loss_status = self.run_batch(batch)
 
+                    # 打印并记录每个子模型的概率
+                    # if self.local_rank == 0:
+                    #     self.logger.write(f"Epoch {epoch}, Iter {iter_id}: AIG Prob: {loss_status['aig_prob'].mean().item():.4f} | "
+                    #                     f"MIG Prob: {loss_status['mig_prob'].mean().item():.4f} | "
+                    #                     f"XMG Prob: {loss_status['xmg_prob'].mean().item():.4f} | "
+                    #                     f"XAG Prob: {loss_status['xag_prob'].mean().item():.4f}\n")
+                        
                     loss = loss_status['prob_loss'] * self.loss_weight[0] + \
                         loss_status['mcm_loss'] * self.loss_weight[1] 
                     
@@ -200,9 +227,14 @@ class TopTrainer():
                     batch_time.update(time.time() - time_stamp)
                     prob_loss_stats.update(loss_status['prob_loss'].item())
                     mcm_loss_stats.update(loss_status['mcm_loss'].item())
+                    prob_loss_aig.update(loss_status['aig_prob'].item())
+                    prob_loss_mig.update(loss_status['mig_prob'].item())
+                    prob_loss_xmg.update(loss_status['xmg_prob'].item())
+                    prob_loss_xag.update(loss_status['xag_prob'].item())
                     if self.local_rank == 0:
                         Bar.suffix = '[{:}/{:}]|Tot: {total:} |ETA: {eta:} '.format(iter_id, len(dataset), total=bar.elapsed_td, eta=bar.eta_td)
                         Bar.suffix += '|Prob: {:.4f} |MCM: {:.4f} '.format(prob_loss_stats.avg, mcm_loss_stats.avg)
+                        Bar.suffix += '|Prob_Aig: {:.4f} |Prob_Xmg: {:.4f} |Prob_Xag: {:.4f} |Prob_Mig: {:.4f} '.format(prob_loss_aig.avg, prob_loss_mig.avg, prob_loss_xmg.avg, prob_loss_xag.avg)
                         Bar.suffix += '|Net: {:.2f}s '.format(batch_time.avg)
                         bar.next()
                 if phase == 'train' and self.model_epoch % 10 == 0:
