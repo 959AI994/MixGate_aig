@@ -61,8 +61,8 @@ class Model(nn.Module):
         # self.update_pi_func = GRU(self.dim_hidden, self.dim_hidden)
 
         # Readout 
-        self.readout_prob = MLP(self.dim_hidden, self.dim_mlp, 1, num_layer=3, p_drop=0.2, norm_layer='batchnorm', act_layer='relu')
-
+        # self.readout_prob = MLP(self.dim_hidden, self.dim_mlp, 1, num_layer=3, p_drop=0.2, norm_layer='batchnorm', act_layer='relu')
+        self.readout_prob = MLP(self.dim_hidden , self.dim_mlp, 1, num_layer=3, p_drop=0.2, norm_layer='batchnorm', act_layer='relu')
         # # consider the embedding for the LSTM/GRU model initialized by non-zeros
         # self.one = torch.ones(1)
         # # self.hs_emd_int = nn.Linear(1, self.dim_hidden)

@@ -65,46 +65,46 @@ class TopModel(nn.Module):
         # Token masking
         self.mask_token = nn.Parameter(torch.randn(1, args.dim_hidden))  # learnable mask token
     
-    def mask_and_predict(self, G, aig_tokens, mig_tokens, xmg_tokens, xag_tokens):
-        """
-        新增：
-        随机选择一个模态 (AIG, MIG, xmg, or XAG) 进行掩码，并预测它。
-        Args:
-            G: 输入图
-            aig_tokens, mig_tokens, xmg_tokens, xag_tokens: 每种模态的 token
-        Returns:
-            predicted_tokens: 预测的被掩码模态 token
-        """
-        # 随机选择一个模态进行掩码
-        modalities = ['aig', 'mig', 'xmg', 'xag']
-        masked_modality = modalities[torch.randint(0, 4, (1,)).item()]
+    # def mask_and_predict(self, G, aig_tokens, mig_tokens, xmg_tokens, xag_tokens):
+    #     """
+    #     新增：
+    #     随机选择一个模态 (AIG, MIG, xmg, or XAG) 进行掩码，并预测它。
+    #     Args:
+    #         G: 输入图
+    #         aig_tokens, mig_tokens, xmg_tokens, xag_tokens: 每种模态的 token
+    #     Returns:
+    #         predicted_tokens: 预测的被掩码模态 token
+    #     """
+    #     # 随机选择一个模态进行掩码
+    #     modalities = ['aig', 'mig', 'xmg', 'xag']
+    #     masked_modality = modalities[torch.randint(0, 4, (1,)).item()]
         
-        # 根据选择的模态进行掩码
-        if masked_modality == 'aig':
-            masked_tokens, mask_indices = self.mask_tokens(G, aig_tokens, self.mask_ratio, k_hop=4)
-            input_tokens = torch.cat([mig_tokens, xmg_tokens, xag_tokens], dim=0)
-        elif masked_modality == 'mig':
-            masked_tokens, mask_indices = self.mask_tokens(G, mig_tokens, self.mask_ratio, k_hop=4)
-            input_tokens = torch.cat([aig_tokens, xmg_tokens, xag_tokens], dim=0)
-        elif masked_modality == 'xmg':
-            masked_tokens, mask_indices = self.mask_tokens(G, xmg_tokens, self.mask_ratio, k_hop=4)
-            input_tokens = torch.cat([aig_tokens, mig_tokens, xag_tokens], dim=0)
-        else:  # 'xag'
-            masked_tokens, mask_indices = self.mask_tokens(G, xag_tokens, self.mask_ratio, k_hop=4)
-            input_tokens = torch.cat([aig_tokens, mig_tokens, xmg_tokens], dim=0)
+    #     # 根据选择的模态进行掩码
+    #     if masked_modality == 'aig':
+    #         masked_tokens, mask_indices = self.mask_tokens(G, aig_tokens, self.mask_ratio, k_hop=4)
+    #         input_tokens = torch.cat([mig_tokens, xmg_tokens, xag_tokens], dim=0)
+    #     elif masked_modality == 'mig':
+    #         masked_tokens, mask_indices = self.mask_tokens(G, mig_tokens, self.mask_ratio, k_hop=4)
+    #         input_tokens = torch.cat([aig_tokens, xmg_tokens, xag_tokens], dim=0)
+    #     elif masked_modality == 'xmg':
+    #         masked_tokens, mask_indices = self.mask_tokens(G, xmg_tokens, self.mask_ratio, k_hop=4)
+    #         input_tokens = torch.cat([aig_tokens, mig_tokens, xag_tokens], dim=0)
+    #     else:  # 'xag'
+    #         masked_tokens, mask_indices = self.mask_tokens(G, xag_tokens, self.mask_ratio, k_hop=4)
+    #         input_tokens = torch.cat([aig_tokens, mig_tokens, xmg_tokens], dim=0)
         
-        # print("[debug] mask_indices:", mask_indices)
-        # print("[debug] masked_tokens:", masked_tokens)
+    #     # print("[debug] mask_indices:", mask_indices)
+    #     # print("[debug] masked_tokens:", masked_tokens)
 
 
-        # 将掩码后的 token 与其他模态的 token 拼接
-        all_tokens = torch.cat([masked_tokens, input_tokens], dim=0)
+    #     # 将掩码后的 token 与其他模态的 token 拼接
+    #     all_tokens = torch.cat([masked_tokens, input_tokens], dim=0)
         
-        # Transformer forward
-        predicted_tokens = self.mask_tf(all_tokens)
+    #     # Transformer forward
+    #     predicted_tokens = self.mask_tf(all_tokens)
         
-        # 返回被掩码模态的预测 token
-        return predicted_tokens[:masked_tokens.shape[0], :], mask_indices
+    #     # 返回被掩码模态的预测 token
+    #     return predicted_tokens[:masked_tokens.shape[0], :], mask_indices
     
     def mask_tokens(self, G, tokens, mask_ratio=0.05, k_hop=4): 
         """
@@ -237,7 +237,32 @@ class TopModel(nn.Module):
         # Predict probability 
         # print("[debug] masked_hf:", masked_hf)
         
-        masked_prob = encoder.pred_prob(masked_hf) # todo：mcm_predicted_tokens
+        # masked_prob = encoder.pred_prob(masked_hf) # todo：mcm_predicted_tokens
+         # 通过 Transformer 处理所有的 tokens（包括掩码后的 tokens 和其他模态的 tokens）
+        # other_tokens = torch.cat([tokens for modality, tokens in tokens_dict.items() if modality != selected_modality], dim=0)
+        # 获取其他模态的 tokens
+        other_tokens = torch.cat([tokens[0] for modality, tokens in tokens_dict.items() if modality != selected_modality], dim=0)
+        input_tokens = masked_tokens
+        # input_tokens = torch.cat([masked_tokens, other_tokens], dim=0)
+        # Debug: Print transformer_hf shape to check
+        
+        
+        # Transformer 层处理
+        transformer_output = self.mask_tf(input_tokens)
+
+        # 从 Transformer 输出中获取处理后的 hf
+        # 根据原来的设定，mask后的部分（即 selected_modality）应该在 transformer 输出中对应
+        # transformer_hf = transformer_output[:masked_tokens.shape[0], :]  # 获取掩码部分的输出
+        transformer_hf =transformer_output[:, self.args.dim_hidden:] 
+        # transformer_hf = transformer_hf.view(-1, 1)  # 调整维度为 (batch_size, 128)
+        
+        # print("[Debug]transformer_hf shape:", transformer_hf.shape)
+
+        # 现在，我们可以用 transformer_hf 进行预测
+        masked_prob = encoder.pred_prob(transformer_hf)
+
+        # masked_prob = encoder.pred_prob(masked_hf)
+
         # print("[debug] masked_prob:", masked_prob)
         # 将 masked_prob 转为 numpy 数组并保存
         masked_prob_np = masked_prob.cpu().detach().numpy()
