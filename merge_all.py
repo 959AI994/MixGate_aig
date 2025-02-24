@@ -3,13 +3,13 @@ import os
 
 # 文件路径列表
 data_paths = [
-    ('/home/wjx/npz/final_data/newest_npz/mig_npz/graphs.npz', '/home/wjx/npz/final_data/newest_npz/mig_npz/labels.npz', '/home/wjx/npz/final_data/newest_npz/mig_npz/graphs1.npz'),
-    ('/home/wjx/npz/final_data/newest_npz/xmg_npz/graphs.npz', '/home/wjx/npz/final_data/newest_npz/xmg_npz/labels.npz', '/home/wjx/npz/final_data/newest_npz/xmg_npz/graphs1.npz'),
-    ('/home/wjx/npz/final_data/newest_npz/xag_npz/graphs.npz', '/home/wjx/npz/final_data/newest_npz/xag_npz/labels.npz', '/home/wjx/npz/final_data/newest_npz/xag_npz/graphs1.npz'),
+    ('/home/jwt/1/mig_npz/graphs.npz', '/home/jwt/1/mig_npz/labels.npz', '/home/jwt/1/mig_npz/graphs1.npz'),
+    ('/home/jwt/1/xmg_npz/graphs.npz', '/home/jwt/1/xmg_npz/labels.npz', '/home/jwt/1/xmg_npz/graphs1.npz'),
+    ('/home/jwt/1/xag_npz/graphs.npz', '/home/jwt/1/xag_npz/labels.npz', '/home/jwt/1/xag_npz/graphs1.npz'),
 ]
 
-output_paths = ['/home/wjx/npz/final_data/newest_npz/mig_npz/graphs1.npz', '/home/wjx/npz/final_data/newest_npz/xmg_npz/graphs1.npz', '/home/wjx/npz/final_data/newest_npz/xag_npz/graphs1.npz', '/home/wjx/npz/final_data/newest_npz/aig_npz/graphs.npz']
-final_output_path = '/home/wjx/npz/final_data/newest_npz/merged_all.npz'
+output_paths = ['/home/jwt/1/xag_npz/graphs1.npz', '/home/jwt/1/xag_npz/graphs1.npz', '/home/jwt/1/xag_npz/graphs1.npz', '/home/jwt/1/aig_npz/graphs.npz']
+final_output_path = '/home/jwt/1/merged_all.npz'
 # aiggraph_path = ['/home/jwt/1/aig_npz/aig_graphs.npz']
 
 # 合并函数
@@ -105,7 +105,7 @@ def merge_all(output_paths, final_output_path):
                 merged[circuit_name]['aig_gate'] = graph['gate']
 
     # 保存合并后的数据
-    np.savez_compressed(final_output_path, circuits=merged)
+    np.savez_compressed(final_output_path, circuits=merged, allowZip64=True)
     print(f"Final Merged data saved to {final_output_path}")
     merged_data = np.load(final_output_path, allow_pickle=True)['circuits'].item() 
     for circuit_name, graph in merged_data.items():

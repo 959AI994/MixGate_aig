@@ -19,7 +19,7 @@ def get_parse_args():
     parser.add_argument('--disable_encode', action='store_true', default=False)
 
     # system
-    parser.add_argument('--gpus', default='-1', 
+    parser.add_argument('--gpus', default='0', 
                              help='-1 for CPU, use comma for multiple gpus')
     parser.add_argument("--local-rank", default=0, type=int)
     parser.add_argument('--num_workers', type=int, default=0,
