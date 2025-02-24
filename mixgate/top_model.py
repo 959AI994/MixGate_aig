@@ -258,7 +258,7 @@ class TopModel(nn.Module):
         
         # print("[Debug]transformer_hf shape:", transformer_hf.shape)
 
-        # 现在，我们可以用 transformer_hf 进行预测
+        # 用 transformer_hf 进行预测
         masked_prob = encoder.pred_prob(transformer_hf)
 
         # masked_prob = encoder.pred_prob(masked_hf)
