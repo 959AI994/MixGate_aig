@@ -236,7 +236,9 @@ class TopTrainer():
                         Bar.suffix += '|Prob: {:.4f} |MCM: {:.4f} '.format(prob_loss_stats.avg, mcm_loss_stats.avg)
                         Bar.suffix += '|Prob_Aig: {:.4f} |Prob_Xmg: {:.4f} |Prob_Xag: {:.4f} |Prob_Mig: {:.4f} '.format(prob_loss_aig.avg, prob_loss_mig.avg, prob_loss_xmg.avg, prob_loss_xag.avg)
                         Bar.suffix += '|Net: {:.2f}s '.format(batch_time.avg)
+                        self.logger.write(Bar.suffix)  # 将更新后的内容写入文件
                         bar.next()
+
                 if phase == 'train' and self.model_epoch % 10 == 0:
                     self.save(os.path.join(self.log_dir, 'model_{:}.pth'.format(self.model_epoch)))
                     self.save(os.path.join(self.log_dir, 'model_last.pth'))
