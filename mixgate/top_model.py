@@ -57,7 +57,12 @@ class TopModel(nn.Module):
         
         self.deepgate_xag = DeepGate_Xag(dim_hidden=args.dim_hidden)
         self.deepgate_xag.load(dg_ckpt_xag)
-        
+
+        # 关键：冻结参数
+        for model in [self.deepgate_aig, self.deepgate_mig, self.deepgate_xmg, self.deepgate_xag]:
+            for param in model.parameters():
+                param.requires_grad = False  
+                
         # Transformer
         tf_layer = nn.TransformerEncoderLayer(d_model=args.dim_hidden * 2, nhead=args.tf_head, batch_first=True)
         self.mask_tf = nn.TransformerEncoder(tf_layer, num_layers=args.tf_layer)
@@ -258,7 +263,7 @@ class TopModel(nn.Module):
         
         # print("[Debug]transformer_hf shape:", transformer_hf.shape)
 
-        # 现在，我们可以用 transformer_hf 进行预测
+        # 用 transformer_hf 进行预测
         masked_prob = encoder.pred_prob(transformer_hf)
 
         # masked_prob = encoder.pred_prob(masked_hf)
