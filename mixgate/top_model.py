@@ -162,7 +162,6 @@ class TopModel(nn.Module):
         aig_hf = aig_hf.detach()
         aig_tokens = torch.cat([aig_hs, aig_hf], dim=1)
 
-
         mig_hs, mig_hf = self.deepgate_mig(G)
         mig_hs = mig_hs.detach()
         mig_hf = mig_hf.detach()
