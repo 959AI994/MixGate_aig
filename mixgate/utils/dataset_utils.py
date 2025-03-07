@@ -8,14 +8,14 @@ from .data_utils import construct_node_feature
 from .dag_utils import return_order_info
         
 class OrderedData(Data):
-    def __init__(self, edge_index=None, x=None, y=None, \
+    def __init__(self, edge_index=None, x=None, y=None, tt_pair_index = None, tt_dis = None, \
                  forward_level=None, forward_index=None, backward_level=None, backward_index=None):
         super().__init__()
         self.edge_index = edge_index
-        #self.tt_pair_index = tt_pair_index
+        self.tt_pair_index = tt_pair_index
         self.x = x
         self.prob = y
-        #self.tt_dis = tt_dis
+        self.tt_dis = tt_dis
         self.forward_level = forward_level
         self.forward_index = forward_index
         self.backward_level = backward_level
@@ -69,6 +69,8 @@ class OrderedData(Data):
             return 0
         elif 'edge_index' in key:
             return 1
+        elif 'tt_pair_index' in key:
+            return 1
         elif key == 'tt_pair_index' or key == 'connect_pair_index':
             return 1
         else:
@@ -82,7 +84,7 @@ class OrderedData(Data):
 #                         ):
 
 
-def parse_pyg_mlpgate(x, edge_index,\
+def parse_pyg_mlpgate(x, edge_index, tt_dis, tt_pair_index, \
                         prob, \
 
                         ):
@@ -110,6 +112,8 @@ def parse_pyg_mlpgate(x, edge_index,\
     edge_index = torch.tensor(edge_index, dtype=torch.long)
     edge_index = edge_index.t().contiguous()
     
+    tt_dis = torch.tensor(tt_dis)
+    tt_pair_index = torch.tensor(tt_pair_index, dtype=torch.long).t().contiguous()
 
     forward_level, forward_index, backward_level, backward_index = return_order_info(edge_index, x_torch.size(0))
 
@@ -123,7 +127,7 @@ def parse_pyg_mlpgate(x, edge_index,\
     #                     tt_pair_index=tt_pair_index, tt_dis=tt_dis, 
     #                     forward_level=forward_level, forward_index=forward_index, 
     #                     backward_level=backward_level, backward_index=backward_index)
-    graph = OrderedData(x=x_torch, edge_index=edge_index, y=prob,
+    graph = OrderedData(x=x_torch, edge_index=edge_index, y=prob, tt_pair_index = tt_pair_index, tt_dis = tt_dis,
                         forward_level=forward_level, forward_index=forward_index, 
                         backward_level=backward_level, backward_index=backward_index)
     graph.use_edge_attr = False

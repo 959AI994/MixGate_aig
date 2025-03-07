@@ -235,7 +235,7 @@ class TopModel(nn.Module):
             # Transformer forward
             batch_predicted_tokens = self.mask_tf(batch_all_tokens)
             batch_pred_masked_tokens = batch_predicted_tokens[:batch_masked_tokens.shape[0], :]
-             # 收集预测的被掩码的 token
+            # 收集预测的被掩码的 token
             mcm_predicted_tokens = torch.cat([mcm_predicted_tokens, batch_pred_masked_tokens], dim=0)
         
         # Predict probability 
