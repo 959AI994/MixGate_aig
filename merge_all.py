@@ -144,3 +144,4 @@ for graphs_path, labels_path, output_path in data_paths:
 
 merge_all(output_paths, final_output_path)
 
+
