@@ -102,13 +102,14 @@ def merge_all(output_paths, final_output_path):
                 merged[circuit_name]['aig_backward_level'] = graph['backward_level']
                 merged[circuit_name]['aig_forward_index'] = graph['forward_index']
                 merged[circuit_name]['aig_backward_index'] = graph['backward_index']
+                merged[circuit_name]['aig_gate']=graph['gate']
 
     # 保存合并后的数据
     np.savez_compressed(final_output_path, circuits=merged)
     print(f"Final Merged data saved to {final_output_path}")
     merged_data = np.load(final_output_path, allow_pickle=True)['circuits'].item() 
     for circuit_name, graph in merged_data.items():
-        if len(merged_data[circuit_name]) != 14:
+        if len(merged_data[circuit_name]) != 17:
                 # print("circuit_name =", len(circuit_name))
                 circuit.append(circuit_name)
     print("circuit = ", circuit)
