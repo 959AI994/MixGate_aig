@@ -80,7 +80,7 @@ class TopTrainer():
             self.logger = Logger(self.log_path)
         
     def set_training_args(self, loss_weight=[], lr=-1, lr_step=-1, device='null'):
-        if len(loss_weight) == 2 and loss_weight != self.loss_weight:
+        if len(loss_weight) == 3 and loss_weight != self.loss_weight:
             print('[INFO] Update loss weight from {} to {}'.format(self.loss_weight, loss_weight))
             self.loss_weight = loss_weight
         if lr > 0 and lr != self.lr:
