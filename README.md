@@ -1,4 +1,7 @@
 # MixGate
+This repo is another version of MixGate, which masks AIG and thereby enhances the representation of AIG with the help of MixGate.
+
+# Prompt
 
 torchrun --nproc_per_node=6 --master_port=29958 train_mask.py     --exp_id mcm_0.03     --batch_size 4     --num_epochs 60     --mask_ratio 0.03     --gpus 0,1,4,5,6,7
 
