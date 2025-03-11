@@ -145,7 +145,7 @@ class TopTrainer():
         # Task 2: Mask PM Circuit Modeling  
         mcm_loss = self.reg_loss(mcm_pm_tokens[mask_indices], pm_tokens[mask_indices])
         
-        # Task 3: Functional Similarity
+        # Task 3: Functional Similarity        
         node_a =  mcm_pm_tokens[batch['tt_pair_index'][0]]
         node_b =  mcm_pm_tokens[batch['tt_pair_index'][1]]
         emb_dis = 1 - torch.cosine_similarity(node_a, node_b, eps=1e-8)
@@ -250,16 +250,16 @@ class TopTrainer():
                         Bar.suffix += '|Prob: {:.4f} |MCM: {:.4f} '.format(prob_loss_stats.avg, mcm_loss_stats.avg)
                         Bar.suffix += '|Prob_Aig: {:.4f} |Prob_Xmg: {:.4f} |Prob_Xag: {:.4f} |Prob_Mig: {:.4f} '.format(prob_loss_aig.avg, prob_loss_mig.avg, prob_loss_xmg.avg, prob_loss_xag.avg)
                         Bar.suffix += '|Func: {:.4f} '.format(func_loss_stats.avg)
-                        Bar.suffix += '|Net: {:.2f}s '.format(batch_time.avg)
-                        self.logger.write(Bar.suffix)  # 将更新后的内容写入文件
+                        Bar.suffix += '|Net: {:.2f}s \n'.format(batch_time.avg)
+                        # self.logger.write(Bar.suffix)  # 将更新后的内容写入文件
                         bar.next()
 
                 if phase == 'train' and self.model_epoch % 10 == 0:
                     self.save(os.path.join(self.log_dir, 'model_{:}.pth'.format(self.model_epoch)))
                     self.save(os.path.join(self.log_dir, 'model_last.pth'))
                 if self.local_rank == 0:
-                    self.logger.write('{}| Epoch: {:}/{:} |Prob: {:.4f} |MCM: {:.4f} |Net: {:.2f}s\n'.format(
-                        phase, epoch, num_epoch, prob_loss_stats.avg, mcm_loss_stats.avg, batch_time.avg))
+                    self.logger.write('{}| Epoch: {:}/{:} |Prob: {:.4f} |Func: {:.4f} |MCM: {:.4f} |Prob_Aig: {:.4f} |Prob_Xmg: {:.4f} |Prob_Xag: {:.4f} |Prob_Mig: {:.4f}|Net: {:.2f}s \n'.format(
+                        phase, epoch, num_epoch, prob_loss_stats.avg,func_loss_stats.avg,mcm_loss_stats.avg, prob_loss_aig.avg, prob_loss_mig.avg, prob_loss_xmg.avg, prob_loss_xag.avg,batch_time.avg))
                     bar.finish()
             
             # Learning rate decay
