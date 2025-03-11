@@ -29,11 +29,12 @@ if __name__ == '__main__':
     print('[INFO] Create Model and Trainer')
     model = mixgate.top_model.TopModel(
         args, 
+        # /home/xqgrp/wangjingxin/pythonproject/MixGate_aig/ckpt/model_func_aig.pth
         # dc_ckpt='./ckpt/dc.pth', /home/xqgrp/wangjingxin/pythonproject/MixGate copy 2/ckpt
-        dg_ckpt_aig='/home/xqgrp/wangjingxin/pythonproject/MixGate copy 2/ckpt/model_func_aig.pth',
-        dg_ckpt_xag='/home/xqgrp/wangjingxin/pythonproject/MixGate copy 2/ckpt/model_func_xag.pth',
-        dg_ckpt_xmg='/home/xqgrp/wangjingxin/pythonproject/MixGate copy 2/ckpt/model_func_xmg.pth',
-        dg_ckpt_mig='/home/xqgrp/wangjingxin/pythonproject/MixGate copy 2/ckpt/model_func_mig.pth'
+        dg_ckpt_aig='/home/xqgrp/wangjingxin/pythonproject/MixGate_aig/ckpt/model_func_aig.pth',
+        dg_ckpt_xag='/home/xqgrp/wangjingxin/pythonproject/MixGate_aig/ckpt/model_func_xag.pth',
+        dg_ckpt_xmg='/home/xqgrp/wangjingxin/pythonproject/MixGate_aig/ckpt/model_func_xmg.pth',
+        dg_ckpt_mig='/home/xqgrp/wangjingxin/pythonproject/MixGate_aig/ckpt/model_func_mig.pth'
     )
 
     trainer = mixgate.top_trainer.TopTrainer(args, model, distributed=True)
