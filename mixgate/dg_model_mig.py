@@ -71,9 +71,9 @@ class Model(nn.Module):
 
     def forward(self, G):
         device = next(self.parameters()).device  # 获取模型第一个参数所在的设备 赋值给device
-        num_nodes = len(G.gate)
-        num_layers_f = max(G.forward_level).item() + 1  # 向前传播多少层
-        num_layers_b = max(G.backward_level).item() + 1
+        num_nodes = len(G.mig_gate)
+        num_layers_f = max(G.mig_forward_level).item() + 1  # 向前传播多少层
+        num_layers_b = max(G.mig_backward_level).item() + 1
         
         # initialize the structure hidden state
         if self.enable_encode:
@@ -87,26 +87,26 @@ class Model(nn.Module):
         hs = hs.to(device)
         hf = hf.to(device)
         
-        edge_index = G.edge_index
+        edge_index = G.mig_edge_index
 
         # print("[debug] G attributes:", dir(G))  # 打印 G 的所有属性
 
         node_state = torch.cat([hs, hf], dim=-1)
-        not_mask = G.gate.squeeze(1) == 2  # NOT门的掩码
-        and_mask = G.gate.squeeze(1) == 3  # AND门的掩码
-        or_mask = G.gate.squeeze(1) == 4   # OR门的掩码
-        maj_mask = G.gate.squeeze(1) == 1  # MAJ门的掩码
-        xor_mask = G.gate.squeeze(1) == 5  # XOR门的掩码
+        not_mask = G.mig_gate.squeeze(1) == 2  # NOT门的掩码
+        and_mask = G.mig_gate.squeeze(1) == 3  # AND门的掩码
+        or_mask = G.mig_gate.squeeze(1) == 4   # OR门的掩码
+        maj_mask = G.mig_gate.squeeze(1) == 1  # MAJ门的掩码
+        xor_mask = G.mig_gate.squeeze(1) == 5  # XOR门的掩码
 
         # pi_mask = G.gate.squeeze(1) == 5   # PI门的掩码
 
         for _ in range(self.num_rounds):
             for level in range(1, num_layers_f):
                 # 正向传播的层
-                layer_mask = G.forward_level == level  # 将目标层级不mask掉，G.forward_level是各节点的层级信息
+                layer_mask = G.mig_forward_level == level  # 将目标层级不mask掉，G.forward_level是各节点的层级信息
 
                 # NOT Gate
-                l_not_node = G.forward_index[layer_mask & not_mask]
+                l_not_node = G.mig_forward_index[layer_mask & not_mask]
                 if l_not_node.size(0) > 0:
                     not_edge_index, not_edge_attr = subgraph(l_not_node, edge_index, dim=1)
                     msg = self.aggr_not_strc(hs, not_edge_index, not_edge_attr)
@@ -121,7 +121,7 @@ class Model(nn.Module):
                     hf[l_not_node, :] = hf_not.squeeze(0)
 
                 # AND Gate
-                l_and_node = G.forward_index[layer_mask & and_mask]
+                l_and_node = G.mig_forward_index[layer_mask & and_mask]
                 if l_and_node.size(0) > 0:
                     and_edge_index, and_edge_attr = subgraph(l_and_node, edge_index, dim=1)
                     msg = self.aggr_and_strc(hs, and_edge_index, and_edge_attr)
@@ -136,7 +136,7 @@ class Model(nn.Module):
                     hf[l_and_node, :] = hf_and.squeeze(0)
 
                 # OR Gate
-                l_or_node = G.forward_index[layer_mask & or_mask]
+                l_or_node = G.mig_forward_index[layer_mask & or_mask]
                 if l_or_node.size(0) > 0:
                     or_edge_index, or_edge_attr = subgraph(l_or_node, edge_index, dim=1)
                     msg = self.aggr_or_strc(hs, or_edge_index, or_edge_attr)
@@ -151,7 +151,7 @@ class Model(nn.Module):
                     hf[l_or_node, :] = hf_or.squeeze(0)
 
                 # Majority Gate
-                l_maj_node = G.forward_index[layer_mask & maj_mask]
+                l_maj_node = G.mig_forward_index[layer_mask & maj_mask]
                 if l_maj_node.size(0) > 0:
                     maj_edge_index, maj_edge_attr = subgraph(l_maj_node, edge_index, dim=1)
                     msg = self.aggr_maj_strc(hs, maj_edge_index, maj_edge_attr)
@@ -165,30 +165,12 @@ class Model(nn.Module):
                     _, hf_maj = self.update_maj_func(maj_msg.unsqueeze(0), hf_maj.unsqueeze(0))
                     hf[l_maj_node, :] = hf_maj.squeeze(0)
 
-                # # PI Gate
-                # l_pi_node = G.forward_index[layer_mask & pi_mask]
-                # if l_pi_node.size(0) > 0:
-                #     pi_edge_index, pi_edge_attr = subgraph(l_pi_node, edge_index, dim=1)
-                #     msg = self.aggr_pi_strc(hs, pi_edge_index, pi_edge_attr)
-                #     pi_msg = torch.index_select(msg, dim=0, index=l_pi_node)
-                #     hs_pi = torch.index_select(hs, dim=0, index=l_pi_node)
-                #     _, hs_pi = self.update_pi_strc(pi_msg.unsqueeze(0), hs_pi.unsqueeze(0))
-                #     hs[l_pi_node, :] = hs_pi.squeeze(0)
-                #     msg = self.aggr_pi_func(node_state, pi_edge_index, pi_edge_attr)
-                #     pi_msg = torch.index_select(msg, dim=0, index=l_pi_node)
-                #     hf_pi = torch.index_select(hf, dim=0, index=l_pi_node)
-                #     _, hf_pi = self.update_pi_func(pi_msg.unsqueeze(0), hf_pi.unsqueeze(0))
-                #     hf[l_pi_node, :] = hf_pi.squeeze(0)
-
                 # 更新节点状态
                 node_state = torch.cat([hs, hf], dim=-1)
 
         node_embedding = node_state.squeeze(0)
         hs = node_embedding[:, :self.dim_hidden]
         hf = node_embedding[:, self.dim_hidden:]
-
-        # print("[debug] mig_hs:", hs)
-        # print("[debug] mig_hf:", hf)
 
         return hs, hf
 

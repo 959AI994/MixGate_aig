@@ -45,17 +45,11 @@ class Model(nn.Module):
         # Readout 
         self.readout_prob = MLP(self.dim_hidden, self.dim_mlp, 1, num_layer=3, p_drop=0.2, norm_layer='batchnorm', act_layer='relu')
 
-        # # consider the embedding for the LSTM/GRU model initialized by non-zeros
-        # self.one = torch.ones(1)
-        # # self.hs_emd_int = nn.Linear(1, self.dim_hidden)
-        # self.hf_emd_int = nn.Linear(1, self.dim_hidden)
-        # self.one.requires_grad = False
-
     def forward(self, G):
         device = next(self.parameters()).device
-        num_nodes = len(G.aig_gate)
-        num_layers_f = max(G.aig_forward_level).item() + 1
-        num_layers_b = max(G.aig_backward_level).item() + 1
+        num_nodes = len(G.gate)
+        num_layers_f = max(G.forward_level).item() + 1
+        num_layers_b = max(G.backward_level).item() + 1
 
         # initialize the structure hidden state
         if self.enable_encode:
@@ -71,7 +65,7 @@ class Model(nn.Module):
         hs = hs.to(device)
         hf = hf.to(device)
         
-        edge_index = G.aig_edge_index
+        edge_index = G.edge_index
 
         # 调试信息：打印 G.gate 和 G.aig_forward_index 的形状
         # print("[debug]: G.gate shape =", G.gate.shape)
@@ -79,8 +73,8 @@ class Model(nn.Module):
         # print("[debug]: G.aig_forward_level shape =", G.aig_forward_level.shape)
 
         node_state = torch.cat([hs, hf], dim=-1)
-        not_mask = G.aig_gate.squeeze(1) == 2 # NOT门的掩码
-        and_mask = G.aig_gate.squeeze(1) == 1  # AND门的掩码
+        not_mask = G.gate.squeeze(1) == 2 # NOT门的掩码
+        and_mask = G.gate.squeeze(1) == 1  # AND门的掩码
         # or_mask = G.gate.squeeze(1) == 4   # OR门的掩码
         # maj_mask = G.gate.squeeze(1) == 1  # MAJ门的掩码
         # xor_mask = G.gate.squeeze(1) == 5  # XOR门的掩码
@@ -91,7 +85,7 @@ class Model(nn.Module):
         for _ in range(self.num_rounds):
             for level in range(1, num_layers_f):
                 # forward layer
-                layer_mask = G.aig_forward_level == level
+                layer_mask = G.forward_level == level
 
                 # 调试信息：检查 layer_mask 和 and_mask 的形状
                 # print(f"[debug] layer_mask shape: {layer_mask.shape}, and_mask shape: {and_mask.shape}")
@@ -104,7 +98,7 @@ class Model(nn.Module):
                 # print(f"[debug] G.aig_forward_index.shape: {G.aig_forward_index.shape}")
                 # print(f"[debug] layer_mask.shape: {layer_mask.shape}, and_mask.shape: {and_mask.shape}")
 
-                l_and_node = G.aig_forward_index[layer_mask & and_mask]
+                l_and_node = G.forward_index[layer_mask & and_mask]
 
                 # 调试信息：打印 l_and_node 的形状
                 # print(f"[debug] l_and_node shape: {l_and_node.shape}")
@@ -138,7 +132,7 @@ class Model(nn.Module):
 
                 # NOT Gate
 
-                l_not_node = G.aig_forward_index[layer_mask & not_mask]
+                l_not_node = G.forward_index[layer_mask & not_mask]
                 if l_not_node.size(0) > 0:
                     not_edge_index, not_edge_attr = subgraph(l_not_node, edge_index, dim=1)
                     # print("layer_mask =", layer_mask)

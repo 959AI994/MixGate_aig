@@ -191,16 +191,16 @@ def generate_orthogonal_vectors(n, dim):
 def generate_hs_init(G, hs, no_dim, aig=False, mig=False, xmg=False, xag=False):
     
     if aig: 
-        if G.aig_batch == None:
+        if G.batch == None:
             batch_size = 1
         else:
-            batch_size = G.aig_batch.max().item() + 1
+            batch_size = G.batch.max().item() + 1
         for batch_idx in range(batch_size):
-            if G.aig_batch == None:
-                pi_mask = (G.aig_forward_level == 0)
+            if G.batch == None:
+                pi_mask = (G.forward_level == 0)
             else:
-                pi_mask = (G.aig_batch == batch_idx) & (G.aig_forward_level == 0)
-            pi_node = G.aig_forward_index[pi_mask]
+                pi_mask = (G.batch == batch_idx) & (G.forward_level == 0)
+            pi_node = G.forward_index[pi_mask]
             pi_vec = generate_orthogonal_vectors(len(pi_node), no_dim)
             pi_vec = np.array(pi_vec, dtype=np.float32)
             hs[pi_node] = torch.tensor(pi_vec, dtype=torch.float)
@@ -224,13 +224,13 @@ def generate_hs_init(G, hs, no_dim, aig=False, mig=False, xmg=False, xag=False):
         if G.batch == None:
                 batch_size = 1
         else:
-            batch_size = G.batch.max().item() + 1
+            batch_size = G.mig_batch.max().item() + 1
         for batch_idx in range(batch_size):
             if G.batch == None:
-                pi_mask = (G.forward_level == 0)
+                pi_mask = (G.mig_forward_level == 0)
             else:
-                pi_mask = (G.batch == batch_idx) & (G.forward_level == 0)
-            pi_node = G.forward_index[pi_mask]
+                pi_mask = (G.mig_batch == batch_idx) & (G.mig_forward_level == 0)
+            pi_node = G.mig_forward_index[pi_mask]
             pi_vec = generate_orthogonal_vectors(len(pi_node), no_dim)
             pi_vec = np.array(pi_vec, dtype=np.float32)
             hs[pi_node] = torch.tensor(pi_vec, dtype=torch.float)
