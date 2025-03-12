@@ -50,6 +50,8 @@ class OrderedData(Data):
                 return len(self.xag_x)  # XAG 模态的节点数
             elif 'xmg' in key:
                 return len(self.xmg_x)  # XMG 模态的节点数
+            elif 'mig' in key:
+                return len(self.mig_x)  # XMG 模态的节点数
             else:
                 return self.num_nodes  # 默认节点数（MIG）
         # 如果是批次相关的字段

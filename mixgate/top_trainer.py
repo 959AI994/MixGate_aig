@@ -134,8 +134,8 @@ class TopTrainer():
         #             self.reg_loss(mig_prob, batch['prob'].unsqueeze(1)) + \
         #             self.reg_loss(xmg_prob, batch['prob'].unsqueeze(1)) + \
         #             self.reg_loss(xag_prob, batch['prob'].unsqueeze(1))
-        prob_aigloss = self.reg_loss(aig_prob, batch['aig_prob'].unsqueeze(1))
-        prob_migloss = self.reg_loss(mig_prob, batch['prob'].unsqueeze(1))
+        prob_aigloss = self.reg_loss(aig_prob, batch['prob'].unsqueeze(1))
+        prob_migloss = self.reg_loss(mig_prob, batch['mig_prob'].unsqueeze(1))
         prob_xmgloss = self.reg_loss(xmg_prob, batch['xmg_prob'].unsqueeze(1))
         prob_xagloss = self.reg_loss(xag_prob, batch['xag_prob'].unsqueeze(1))     
 

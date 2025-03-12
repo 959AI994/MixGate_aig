@@ -48,10 +48,10 @@ class TopModel(nn.Module):
         self.deepgate_xag = DeepGate_Xag(dim_hidden=args.dim_hidden)
         self.deepgate_xag.load(dg_ckpt_xag)
 
-        # 关键：冻结参数
-        for model in [self.deepgate_aig, self.deepgate_mig, self.deepgate_xmg, self.deepgate_xag]:
-            for param in model.parameters():
-                param.requires_grad = False  
+        # # 关键：冻结参数
+        # for model in [self.deepgate_aig, self.deepgate_mig, self.deepgate_xmg, self.deepgate_xag]:
+        #     for param in model.parameters():
+        #         param.requires_grad = False  
                 
         # Transformer
         tf_layer = nn.TransformerEncoderLayer(d_model=args.dim_hidden * 2, nhead=args.tf_head, batch_first=True)
@@ -59,6 +59,7 @@ class TopModel(nn.Module):
         
         # Token masking
         self.mask_token = nn.Parameter(torch.randn(1, args.dim_hidden))  # learnable mask token
+
     
     def mask_tokens(self, G, tokens, mask_ratio=0.05, k_hop=4): 
         """
@@ -140,6 +141,8 @@ class TopModel(nn.Module):
         selected_tokens, masked_hf, encoder = tokens_dict[selected_modality]
         # 对选定模态进行掩码
         masked_tokens, mask_indices = self.mask_tokens(G, selected_tokens, self.mask_ratio, k_hop=4)
+        # Print debugging information for mask tokens and graph
+        # print(f"[Debug] Tokens shapes: aig_tokens {aig_tokens.shape}, mig_tokens {mig_tokens.shape}, xmg_tokens {xmg_tokens.shape}, xag_tokens {xag_tokens.shape}")
     
 
         # Reconstruction: Mask Circuit Modeling 
