@@ -134,7 +134,6 @@ class TopModel(nn.Module):
         # 对选定模态进行掩码
         masked_tokens, mask_indices = self.mask_tokens(G, selected_tokens, self.mask_ratio, k_hop=4)
     
-
         # Reconstruction: Mask Circuit Modeling 
         for batch_id in range(G.batch.max().item() + 1): 
             # batch_pm_tokens_masked = pm_tokens_masked[G.batch == batch_id]
