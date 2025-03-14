@@ -96,16 +96,9 @@ class TopModel(nn.Module):
 
     def forward(self, G):
         self.device = next(self.parameters()).device
-        # Get PM and AIG tokens
-        # pm_hs, pm_hf = self.deepcell(G)
-        # pm_tokens = torch.cat([pm_hs, pm_hf], dim=1)
+
         mcm_predicted_tokens = torch.zeros(0, self.args.dim_hidden * 2).to(self.device)
 
-        # aig_hs, aig_hf = self.deepgate(G)
-        # aig_hs = aig_hs.detach()
-        # aig_hf = aig_hf.detach()
-        # aig_tokens = torch.cat([aig_hs, aig_hf], dim=1)
-        
         # Get tokens from AIG, MIG, xmg, XAG
         aig_hs, aig_hf = self.deepgate_aig(G)
         aig_hs = aig_hs.detach()
@@ -135,14 +128,11 @@ class TopModel(nn.Module):
             'xmg': (xmg_tokens, xmg_hf, self.deepgate_xmg),
             'xag': (xag_tokens, xag_hf, self.deepgate_xag),
         }
-        # 随机选择一个模态
-        # selected_modality = modalities[torch.randint(0, len(modalities), (1,)).item()]
+
         selected_modality = 'aig'
         selected_tokens, masked_hf, encoder = tokens_dict[selected_modality]
         # 对选定模态进行掩码
         masked_tokens, mask_indices = self.mask_tokens(G, selected_tokens, self.mask_ratio, k_hop=4)
-        # Print debugging information for mask tokens and graph
-        # print(f"[Debug] Tokens shapes: aig_tokens {aig_tokens.shape}, mig_tokens {mig_tokens.shape}, xmg_tokens {xmg_tokens.shape}, xag_tokens {xag_tokens.shape}")
     
 
         # Reconstruction: Mask Circuit Modeling 
@@ -176,41 +166,13 @@ class TopModel(nn.Module):
             # 收集预测的被掩码的 token
             mcm_predicted_tokens = torch.cat([mcm_predicted_tokens, batch_pred_masked_tokens], dim=0)
         
-        # Predict probability 
-        # print("[debug] masked_hf:", masked_hf)
-        
-        # masked_prob = encoder.pred_prob(masked_hf) # todo：mcm_predicted_tokens
-         # 通过 Transformer 处理所有的 tokens（包括掩码后的 tokens 和其他模态的 tokens）
-        # other_tokens = torch.cat([tokens for modality, tokens in tokens_dict.items() if modality != selected_modality], dim=0)
         # 获取其他模态的 tokens
         other_tokens = torch.cat([tokens[0] for modality, tokens in tokens_dict.items() if modality != selected_modality], dim=0)
         input_tokens = masked_tokens
-        # input_tokens = torch.cat([masked_tokens, other_tokens], dim=0)
-        # Debug: Print transformer_hf shape to check
         
-        
-        # Transformer 层处理
-        transformer_output = self.mask_tf(input_tokens)
+        hf_tokens = mcm_predicted_tokens[:, self.args.dim_hidden:]
+        masked_prob = encoder.pred_prob(hf_tokens)
 
-        # 从 Transformer 输出中获取处理后的 hf
-        # 根据原来的设定，mask后的部分（即 selected_modality）应该在 transformer 输出中对应
-        # transformer_hf = transformer_output[:masked_tokens.shape[0], :]  # 获取掩码部分的输出
-        transformer_hf =transformer_output[:, self.args.dim_hidden:] 
-        # transformer_hf = transformer_hf.view(-1, 1)  # 调整维度为 (batch_size, 128)
-        
-        # print("[Debug]transformer_hf shape:", transformer_hf.shape)
-
-        # 用 transformer_hf 进行预测
-        masked_prob = encoder.pred_prob(transformer_hf)
-
-        # masked_prob = encoder.pred_prob(masked_hf)
-
-        # print("[debug] masked_prob:", masked_prob)
-        # 将 masked_prob 转为 numpy 数组并保存
-        masked_prob_np = masked_prob.cpu().detach().numpy()
-        # 保存到 txt 文件
-        # np.savetxt("masked_prob.txt", masked_prob_np)
-        
         # 获取每个模态的预测概率
         aig_prob = self.deepgate_aig.pred_prob(aig_hf)
         mig_prob = self.deepgate_mig.pred_prob(mig_hf)
