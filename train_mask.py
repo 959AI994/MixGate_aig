@@ -16,7 +16,6 @@ DATA_DIR = './data/dg_pair'
 if __name__ == '__main__':
     args = get_parse_args()
 
-    # circuit_path = 'datasets/pair_graphs.npz'
     circuit_path ='/home/xqgrp/wangjingxin/datasets/mixgate_data/merged_all1500.npz'
     num_epochs = args.num_epochs
     
@@ -29,8 +28,6 @@ if __name__ == '__main__':
     print('[INFO] Create Model and Trainer')
     model = mixgate.top_model.TopModel(
         args, 
-        # /home/xqgrp/wangjingxin/pythonproject/MixGate_aig/ckpt/model_func_aig.pth
-        # dc_ckpt='./ckpt/dc.pth', /home/xqgrp/wangjingxin/pythonproject/MixGate copy 2/ckpt
         dg_ckpt_aig='/home/xqgrp/wangjingxin/pythonproject/MixGate_aig/ckpt/model_func_aig.pth',
         dg_ckpt_xag='/home/xqgrp/wangjingxin/pythonproject/MixGate_aig/ckpt/model_func_xag.pth',
         dg_ckpt_xmg='/home/xqgrp/wangjingxin/pythonproject/MixGate_aig/ckpt/model_func_xmg.pth',
@@ -38,12 +35,19 @@ if __name__ == '__main__':
     )
 
     trainer = mixgate.top_trainer.TopTrainer(args, model, distributed=True)
-    trainer.set_training_args(lr=1e-4, lr_step=50, loss_weight = [3.0, 1.0, 0])
+    trainer.set_training_args(lr=1e-4, lr_step=50, loss_weight = [1.0, 0.0, 0])
     print('[INFO] Stage 1 Training ...')
     trainer.train(num_epochs, train_dataset, val_dataset)
 
+    # 保存第一阶段训练结束后的权重
+    trainer.save(os.path.join(trainer.log_dir, 'stage1_model.pth'))
+    # 加载第一阶段的模型权重
+    print('[INFO] Loading Stage 1 Checkpoint...')
+    trainer.load(os.path.join(trainer.log_dir, 'stage1_model.pth'))
+
+
     print('[INFO] Stage 2 Training ...')
-    trainer.set_training_args(loss_weight = [3.0, 1.0, 3.0], lr=1e-4, lr_step=50)
+    trainer.set_training_args(loss_weight = [1.0, 0.0, 1.0], lr=1e-4, lr_step=50)
     trainer.train(num_epochs, train_dataset, val_dataset)
 
 
